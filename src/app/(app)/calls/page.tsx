@@ -80,7 +80,7 @@ export default function CallsPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="border-t border-border">
           {filteredCalls.map((call) => (
             <CallCard
               key={call.id}

@@ -24,7 +24,7 @@ export function MobileNav() {
     <nav aria-label="Navegação no celular" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur-md border-t border-border pb-safe">
       {moreOpen ? (
         <div className="border-b border-border p-3 grid grid-cols-2 gap-2" aria-label="Mais páginas">
-          {[['Desempenho', '/analytics'], ['Avaliações', '/evaluations'], ['Simulador', '/simulator'], ['Configurações', '/settings'], ['Login', '/login']].map(([name, href]) => (
+          {[['Demo interativa', '/demo'], ['Desempenho', '/analytics'], ['Avaliações', '/evaluations'], ['Simulador', '/simulator'], ['Configurações', '/settings'], ['Login', '/login']].map(([name, href]) => (
             <Link key={href} href={href} onClick={() => setMoreOpen(false)} className="rounded-lg px-4 py-3 text-sm hover:bg-background" aria-current={pathname === href ? 'page' : undefined}>{name}</Link>
           ))}
         </div>

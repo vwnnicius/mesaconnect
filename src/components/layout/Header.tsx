@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { QrCode, Cpu, Bell } from 'lucide-react';
+import { QrCode, Play, Bell } from 'lucide-react';
 import { RESTAURANT_DEMO } from '@/lib/constants';
 import { useCalls } from '@/hooks/useCalls';
 import { BrandMark } from '@/components/layout/BrandMark';
@@ -32,11 +32,11 @@ export function Header() {
 
       <div className="flex items-center gap-1.5">
         <Link
-          href="/simulator"
+          href="/demo"
           className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:bg-white/70 dark:text-stone-300 dark:hover:bg-white/5"
         >
-          <Cpu className="w-3.5 h-3.5" />
-          Simulador
+          <Play className="w-3.5 h-3.5" />
+          Demo interativa
         </Link>
         <Link
           href={`/evaluate/${RESTAURANT_DEMO.slug}/07`}

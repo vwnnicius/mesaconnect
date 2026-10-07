@@ -12,6 +12,7 @@ import {
   Cpu,
   Settings,
   LogOut,
+  Play,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCalls } from '@/hooks/useCalls';
@@ -27,6 +28,7 @@ const navItems = [
   { name: 'Salão', href: '/tables', icon: Grid3X3 },
   { name: 'Desempenho', href: '/analytics', icon: BarChart3 },
   { name: 'Avaliações', href: '/evaluations', icon: Star },
+  { name: 'Demo interativa', href: '/demo', icon: Play },
   { name: 'Simulador', href: '/simulator', icon: Cpu },
   { name: 'Configurações', href: '/settings', icon: Settings },
 ];

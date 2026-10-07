@@ -2,6 +2,8 @@
 
 > **Estado do MVP:** há funcionalidades reais e telas demonstrativas. Leia [a auditoria técnica](AUDIT.md) antes de usar em um piloto. Métricas históricas ainda são exemplos; as políticas SQL versionadas precisam de revisão antes de uso com múltiplos restaurantes. A validação desta revisão está em [VALIDATION.md](VALIDATION.md).
 
+**Demo interativa:** abra `/demo` para experimentar o salão, botão do cliente, atendimento e avaliação, com reprodução guiada ou interação manual. A demo é isolada e não grava no Supabase. Veja [detalhes e limites](docs/DEMO.md) e o [plano para o piloto](docs/PLANO-PRODUTO.md).
+
 > **Sistema de Atendimento em Tempo Real por Mesa para Restaurantes e Rodízios**  
 > Reduzindo o tempo de espera do cliente e maximizando a produtividade da equipe através de hardware inteligente (ESP32) e aplicativo web ágil.
 
@@ -13,9 +15,9 @@ Em restaurantes de rodízio e alta rotatividade, um dos maiores gargalos de sati
 
 O **MesaConnect** resolve essa dor:
 1. **Dispositivo Físico na Mesa (ESP32)**: O cliente aperta um botão físico discreto.
-2. **Recepção Instantânea (Supabase Realtime)**: O evento é transmitido via Wi-Fi em milissegundos.
+2. **Recepção (Supabase Realtime)**: O objetivo é transmitir o evento pela rede e atualizar a equipe; a latência precisa ser medida no piloto.
 3. **Painel do Garçom (/calls)**: O garçom vê a mesa chamando com cronômetro em tempo real e assume o atendimento em 1 toque.
-4. **Métricas de SLA (/dashboard & /analytics)**: O gerente acompanha o tempo médio e mediano de resposta.
+4. **Operação e métricas (/dashboard & /analytics)**: O painel mostra mesas e fila ativa; indicadores históricos em analytics ainda são demonstrativos.
 5. **Avaliação pelo QR Code (/evaluate)**: O cliente avalia de 1 a 5 estrelas sem necessidade de login.
 
 ---

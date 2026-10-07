@@ -33,3 +33,12 @@ Nenhuma migration ou política foi aplicada no Supabase. Não foram alteradas va
 - Fluxo local no navegador: assumir mesa 04, concluir, confirmar mesa disponível; chamar mesa 09 pelo simulador e conferir chamado correto; abrir menu Mais e avaliações; enviar nota/comentário pela avaliação pública, com confirmação explícita de demonstração local.
 
 O modo sem credenciais foi usado para não gerar registros de teste no restaurante em produção. As subscrições Realtime e as políticas reais do Supabase exigem validação separada no ambiente configurado.
+
+## Demo e redesenho — 7 de outubro de 2026
+
+- `/demo` independente dos providers e serviços de dados da operação. Ciclo manual do botão até a avaliação de 4 estrelas verificado no navegador; percurso automático encerrou com avaliação de 5 estrelas. Wi-Fi desligado bloqueou botão e avanço inicial, sem fabricar um chamado.
+- Dashboard redesenhado com mapa ilustrativo selecionável e fila funcional. Indicadores fictícios foram removidos desta página; analytics mantém exemplos identificados.
+- Nove testes aprovados: os seis anteriores e três novos do reducer da demo. Tipos e build final aprovados; lint sem erros, com os mesmos 24 avisos de `any` legados.
+- Verificação no navegador de largura 360 px, tablet 768 px e desktop 1440 px, sem rolagem horizontal no dashboard; demo verificada em celular, tablet e desktop. Planta explicitamente ilustrativa.
+- Nenhuma alteração remota no Supabase, nas credenciais ou nas variáveis da Vercel. Login por restaurante, convites e API autenticada de hardware continuam pendentes, conforme auditoria e plano de produto.
+- Lovable e Supabase encontrados como instalados no catálogo. As ações desses provedores não estavam expostas nesta sessão; o frontend foi implementado diretamente no repositório Next.js. GitHub confirmou acesso de escrita ao repositório existente.
