@@ -13,6 +13,8 @@ import {
   Settings,
   LogOut,
   Play,
+  Monitor,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCalls } from "@/hooks/useCalls";
@@ -27,10 +29,13 @@ const navItems = [
   { name: "Painel", href: "/dashboard", icon: LayoutDashboard },
   { name: "Chamados", href: "/calls", icon: BellRing, badge: true },
   { name: "Salão", href: "/tables", icon: Grid3X3 },
+  { name: "Tela", href: "/screen", icon: Monitor },
+  { name: "Atividade", href: "/activity", icon: ListChecks },
   { name: "Desempenho", href: "/analytics", icon: BarChart3 },
   { name: "Avaliações", href: "/evaluations", icon: Star },
   { name: "Demo interativa", href: "/demo", icon: Play },
   { name: "Simulador", href: "/simulator", icon: Cpu },
+  { name: "Dispositivos", href: "/devices", icon: Cpu },
   { name: "Configurações", href: "/settings", icon: Settings },
 ];
 
@@ -39,7 +44,7 @@ export function Sidebar() {
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
   const pathname = usePathname();
-  const { restaurant, profile, manager } = useWorkspace();
+  const { restaurant, profile, manager, platformAdmin } = useWorkspace();
   const { calls } = useCalls();
   const pendingCallsCount = calls.filter((c) => c.status === "CALLING").length;
 
@@ -84,7 +89,9 @@ export function Sidebar() {
         {navItems
           .filter(
             (item) =>
-              manager || ["/calls", "/tables", "/demo"].includes(item.href),
+              (item.href !== "/devices" || platformAdmin) &&
+              (manager ||
+                ["/calls", "/tables", "/demo", "/screen"].includes(item.href)),
           )
           .map((item) => {
             const isActive = pathname === item.href;
@@ -97,6 +104,8 @@ export function Sidebar() {
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "group flex items-center justify-between px-3 py-2.5 text-[13px] rounded-lg transition-colors",
+                  item.href === "/screen" &&
+                    "border border-accent/20 text-accent",
                   isActive
                     ? "bg-background text-foreground font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-background",

@@ -1,75 +1,113 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
 import { createClient } from "@/lib/supabase/client";
-import { getEvaluations } from "@/services/evaluationsService";
-import { inMemoryStore } from "@/services/mockStore";
 import { subscribeTableChanges } from "@/lib/realtime";
 import { operationMetrics } from "@/lib/operation-metrics";
-import type { ServiceCall, Evaluation } from "@/types";
-export function useOperationMetrics(days = 1) {
-  const { restaurant, demo, manager } = useWorkspace();
-  const [calls, setCalls] = useState<ServiceCall[]>([]);
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [error, setError] = useState("");
+import { reportBounds } from "@/lib/report-period";
+import { inMemoryStore } from "@/services/mockStore";
+export type StaffRank = {
+  id: string;
+  name: string;
+  accepted: number;
+  completed: number;
+  response: number | null;
+  median: number | null;
+  sla: number | null;
+};
+type Report = ReturnType<typeof operationMetrics> & {
+  feedback_count: number;
+  ranks: StaffRank[];
+};
+const empty: Report = {
+  ...operationMetrics([], []),
+  feedback_count: 0,
+  ranks: [],
+};
+export function useOperationMetrics(
+  days = 1,
+  month?: string,
+  employee?: string,
+) {
+  const w = useWorkspace();
+  const [metrics, setMetrics] = useState<Report>(empty);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const sequence = useRef(0);
   const load = useCallback(async () => {
-    if (!manager) {
+    const seq = ++sequence.current;
+    if (!w.manager) {
       setLoading(false);
       return;
     }
+    setLoading(true);
     try {
-      const since = new Date();
-      since.setHours(0, 0, 0, 0);
-      since.setDate(since.getDate() - days + 1);
-      const iso = since.toISOString();
-      let history: ServiceCall[];
-      if (demo)
-        history = inMemoryStore.getCalls().filter((c) => c.requested_at >= iso);
-      else {
-        const { data, error } = await createClient()
-          .from("service_calls")
-          .select("*")
-          .eq("restaurant_id", restaurant.id)
-          .gte("requested_at", iso)
-          .order("requested_at")
-          .limit(1000);
-        if (error) throw error;
-        history = data || [];
+      const bounds = reportBounds(days, month);
+      let report: Report;
+      if (w.demo) {
+        const calls = inMemoryStore
+          .getCalls()
+          .filter(
+            (c) =>
+              (!bounds.started || c.requested_at >= bounds.started) &&
+              (!bounds.ended || c.requested_at < bounds.ended) &&
+              (!employee || c.acknowledged_by === employee),
+          );
+        const feedback = inMemoryStore
+          .getEvaluations()
+          .filter(
+            (e) =>
+              (!bounds.started || e.created_at >= bounds.started) &&
+              (!bounds.ended || e.created_at < bounds.ended),
+          );
+        report = {
+          ...operationMetrics(calls, feedback),
+          feedback_count: feedback.length,
+          ranks: [],
+        };
+      } else {
+        const { data, error } = await createClient().rpc("operational_report", {
+          unit: w.restaurant.id,
+          ...bounds,
+          ...(employee ? { employee } : {}),
+        });
+        if (error || !data) throw error;
+        report = data as unknown as Report;
       }
-      const feedback = await getEvaluations(restaurant.id);
-      setCalls(history);
-      setEvaluations(feedback.filter((e) => e.created_at >= iso));
-      setError("");
+      if (seq === sequence.current) {
+        setMetrics(report);
+        setError("");
+      }
     } catch {
-      setError("Não foi possível atualizar os indicadores.");
+      if (seq === sequence.current)
+        setError("Não foi possível atualizar os indicadores.");
     } finally {
-      setLoading(false);
+      if (seq === sequence.current) setLoading(false);
     }
-  }, [restaurant.id, days, demo, manager]);
+  }, [w.restaurant.id, w.manager, w.demo, days, month, employee]);
   useEffect(() => {
+    const requestSequence = sequence;
     void load();
     const one = subscribeTableChanges(
       "service_calls",
-      `restaurant_id=eq.${restaurant.id}`,
-      load,
+      `restaurant_id=eq.${w.restaurant.id}`,
+      () => void load(),
     );
     const two = subscribeTableChanges(
       "evaluations",
-      `restaurant_id=eq.${restaurant.id}`,
-      load,
+      `restaurant_id=eq.${w.restaurant.id}`,
+      () => void load(),
     );
-    const three = inMemoryStore.subscribe(() => void load());
     return () => {
+      requestSequence.current++;
       one();
       two();
-      three();
     };
-  }, [load, restaurant.id]);
+  }, [load, w.restaurant.id]);
   return {
-    calls,
-    evaluations,
-    metrics: operationMetrics(calls, evaluations),
+    metrics,
+    feedbackCount: metrics.feedback_count,
+    ranks: metrics.ranks,
     loading,
     error,
   };

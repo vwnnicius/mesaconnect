@@ -13,6 +13,7 @@ import {
   Wifi,
   WifiOff,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { FloorPlan } from "@/components/tables/FloorPlan";
 import {
@@ -31,11 +32,11 @@ const chapters = [
   "Cliente avalia",
 ];
 const descriptions = [
-  "Tudo começa com um toque. Escolha qualquer mesa do salão para experimentar.",
-  "O chamado aparece na fila. A equipe sabe exatamente qual mesa precisa de atenção.",
-  "Ana assumiu o chamado. A mesa sabe que alguém está a caminho.",
-  "Atendimento encerrado. Agora o cliente pode contar como foi sua experiência.",
-  "O ciclo está completo. A avaliação ajuda o gerente a acompanhar a experiência no salão.",
+  "Cliente: escolha uma mesa e toque no botão. Verde significa disponível; nada foi solicitado ainda.",
+  "O botão envia a solicitação pelo Wi-Fi. Âmbar significa chamando: o garçom vê a mesa, o tempo de espera e a prioridade na fila e na Tela.",
+  "Garçom: toque em Atender agora para assumir a responsabilidade. Azul significa confirmado; vá até a mesa e registre observações úteis.",
+  "Garçom: conclua somente depois de atender. Convide o cliente a avaliar pelo QR da mesa: sua opinião ajuda a melhorar o serviço. A avaliação é opcional.",
+  "Gerente: acompanhe relatórios e registros da equipe. O cliente também pode avaliar o estabelecimento no Google pelo link ou QR configurado, com qualquer nota.",
 ];
 
 function elapsed(start: number | null, end: number): string {
@@ -133,6 +134,7 @@ export function DemoExperience() {
           <span className="font-semibold tracking-tight">MesaConnect</span>
         </Link>
         <span className="demo-label">Experiência interativa</span>
+        <ThemeToggle />
         <Link href="/dashboard" className="demo-back">
           <ArrowLeft size={15} />
           <span>Voltar ao painel</span>
@@ -181,6 +183,36 @@ export function DemoExperience() {
           </div>
         </section>
 
+        <details className="demo-guide">
+          <summary>Entenda os papéis e os sinais do salão</summary>
+          <ol>
+            <li>
+              <strong>Cliente:</strong> chama pelo botão e pode avaliar pelo QR,
+              sem login.
+            </li>
+            <li>
+              <strong>Garçom:</strong> assume, atende, registra observações e
+              conclui. Incentive uma opinião sincera, sem pressionar por nota.
+            </li>
+            <li>
+              <strong>Gerente:</strong> cuida da fila, prioridades, acessos de
+              garçons, atividade e relatórios.
+            </li>
+            <li>
+              <strong>Proprietário:</strong> administra sua empresa e cria
+              gerentes.
+            </li>
+            <li>
+              <strong>Administrador geral:</strong> configura empresas e
+              dispositivos ESP32.
+            </li>
+          </ol>
+          <p>
+            Verde: disponível · Âmbar: chamando · Azul: em atendimento ·
+            Vermelho: não incomodar · Cinza: sem sinal. Espera acima de 5
+            minutos recebe aviso de atraso; prioridade é definida pela gestão.
+          </p>
+        </details>
         <div className="demo-notice">
           <span className="demo-notice-dot" />
           Ambiente de demonstração. Mesas, equipe, tempos e avaliações são

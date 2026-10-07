@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
 export function DevicePairing() {
   const { tables } = useTables();
-  const { demo } = useWorkspace();
+  const { demo, platformAdmin } = useWorkspace();
   const [credentials, setCredentials] = useState<{
     uid: string;
     token: string;
@@ -30,6 +30,8 @@ export function DevicePairing() {
       setBusy(false);
     }
   };
+  if (!platformAdmin)
+    return <p>Dispositivos são configurados pelo administrador geral.</p>;
   return (
     <section className="surface">
       <h2>Dispositivos das mesas</h2>

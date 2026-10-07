@@ -13,6 +13,7 @@ type PublicTable = Table & {
   restaurant_name?: string;
   logo_path?: string | null;
   cover_path?: string | null;
+  google_review_url?: string | null;
 };
 export default function CustomerEvaluation() {
   const params = useParams();
@@ -67,6 +68,16 @@ export default function CustomerEvaluation() {
           )}
           <span>MesaConnect</span>
         </div>
+        {table?.google_review_url && (
+          <a
+            className="google-review-link"
+            href={table.google_review_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Avaliar o estabelecimento no Google ↗
+          </a>
+        )}
         {loading ? (
           <p role="status">Abrindo sua mesa…</p>
         ) : !table ? (

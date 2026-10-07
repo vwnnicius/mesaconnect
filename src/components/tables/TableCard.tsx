@@ -1,6 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { TableNotes } from "./TableNotes";
+import { useTables } from "@/hooks/useTables";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { Table } from "@/types";
 import { TABLE_STATUS_CONFIG } from "@/lib/constants";
@@ -15,7 +18,10 @@ interface TableCardProps {
 }
 
 export function TableCard({ table }: TableCardProps) {
-  const { restaurant } = useWorkspace();
+  const { restaurant, manager, demo } = useWorkspace();
+  const { refresh } = useTables();
+  const [expanded, setExpanded] = useState(false);
+  const [error, setError] = useState("");
   const config =
     TABLE_STATUS_CONFIG[table.status] || TABLE_STATUS_CONFIG.AVAILABLE;
   const hasActiveCall =
@@ -25,7 +31,7 @@ export function TableCard({ table }: TableCardProps) {
   return (
     <div
       className={cn(
-        "relative rounded-box border p-5 flex flex-col justify-between bg-card border-border min-h-[168px]",
+        "mesa-card relative rounded-box border p-5 flex flex-col justify-between bg-card border-border min-h-[168px]",
         table.status === "CALLING" && "border-amber-300 dark:border-amber-800",
       )}
     >
@@ -58,6 +64,36 @@ export function TableCard({ table }: TableCardProps) {
           <QrCode className="w-4 h-4" />
         </Link>
       </div>
+      {table.priority && <p className="priority-tag">Prioridade</p>}
+      {manager && (
+        <label className="priority-control">
+          <input
+            type="checkbox"
+            checked={Boolean(table.priority)}
+            disabled={demo}
+            onChange={async (e) => {
+              const { error } = await createClient()
+                .from("tables")
+                .update({ priority: e.target.checked })
+                .eq("id", table.id);
+              if (error) setError("Não foi possível alterar prioridade.");
+              else {
+                setError("");
+                await refresh();
+              }
+            }}
+          />
+          Priorizar atendimento
+        </label>
+      )}
+      <details
+        className="table-notes-toggle"
+        onToggle={(e) => setExpanded(e.currentTarget.open)}
+      >
+        <summary>Observações da mesa</summary>
+        {expanded && <TableNotes tableId={table.id} number={table.number} />}
+      </details>
+      {error && <p role="alert">{error}</p>}
     </div>
   );
 }

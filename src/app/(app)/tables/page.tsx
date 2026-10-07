@@ -60,7 +60,14 @@ export default function TablesPage() {
         description="Organize o salão do jeito que ele funciona na vida real."
         actions={
           <>
-            <button className="action-outline" onClick={() => setList(!list)}>
+            <button
+              className="action-outline"
+              onClick={() => {
+                setList(!list);
+                setEditing(false);
+                setSelected("");
+              }}
+            >
               <LayoutGrid size={16} />
               {list ? "Ver planta" : "Ver lista"}
             </button>
@@ -105,7 +112,7 @@ export default function TablesPage() {
             />
           )}
         </section>
-        {editing ? (
+        {editing && !list ? (
           <aside className="surface editor-inspector">
             <h2>Personalizar layout</h2>
             <label>
@@ -200,7 +207,7 @@ export default function TablesPage() {
               Organizar em grade
             </button>
           </aside>
-        ) : selected ? (
+        ) : selected && !list ? (
           <aside className="surface editor-inspector">
             <h2>Mesa {selected}</h2>
             <p>{seat?.sector}</p>

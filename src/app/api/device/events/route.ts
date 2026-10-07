@@ -21,6 +21,11 @@ export async function POST(request: NextRequest) {
     if (
       typeof data.device_uid !== "string" ||
       data.device_uid.length > 100 ||
+      (data.event_id !== undefined &&
+        (typeof data.event_id !== "string" ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            data.event_id,
+          ))) ||
       !["CALL", "DO_NOT_DISTURB", "RESET", "HEARTBEAT"].includes(
         data.event_type,
       )

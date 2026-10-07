@@ -3,16 +3,23 @@
 import React, { useState } from "react";
 import { ServiceCall } from "@/types";
 import { useElapsedTime } from "@/hooks/useElapsedTime";
+import { TableNotes } from "@/components/tables/TableNotes";
 import { ArrowRight } from "lucide-react";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
 
 interface CallCardProps {
   call: ServiceCall;
+  priority?: boolean;
   onAcknowledge: (id: string) => Promise<void>;
   onComplete: (id: string) => Promise<void>;
 }
 
-export function CallCard({ call, onAcknowledge, onComplete }: CallCardProps) {
+export function CallCard({
+  call,
+  priority,
+  onAcknowledge,
+  onComplete,
+}: CallCardProps) {
   const { profile, members, manager, demo } = useWorkspace();
   const canAct =
     call.status === "CALLING" ||
@@ -64,6 +71,7 @@ export function CallCard({ call, onAcknowledge, onComplete }: CallCardProps) {
           <strong>{elapsed}</strong>
         </div>
       </div>
+      {priority && <p className="priority-tag">Atendimento prioritário</p>}
       <p className="call-meta">
         {isCalling
           ? "Pedido de atendimento"
@@ -119,6 +127,7 @@ export function CallCard({ call, onAcknowledge, onComplete }: CallCardProps) {
             <span>{call.completed_at ? "Concluído" : "Pendente"}</span>
           </p>
         </div>
+        <TableNotes tableId={call.table_id} number={call.table_number || ""} />
       </details>
       {error ? (
         <p role="alert" className="text-xs text-red-700 dark:text-red-300 mt-3">

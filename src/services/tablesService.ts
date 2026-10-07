@@ -19,6 +19,8 @@ export async function getTables(
       restaurant_id,
       number,
       device_id,
+      priority,
+      device_last_seen,
       status,
       created_at
     `,

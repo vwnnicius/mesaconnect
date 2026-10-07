@@ -14,6 +14,58 @@ export type Database = {
   };
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string;
+          actor_id: string | null;
+          created_at: string;
+          details: Json;
+          id: string;
+          restaurant_id: string;
+          table_id: string | null;
+        };
+        Insert: {
+          action: string;
+          actor_id?: string | null;
+          created_at?: string;
+          details?: Json;
+          id?: string;
+          restaurant_id: string;
+          table_id?: string | null;
+        };
+        Update: {
+          action?: string;
+          actor_id?: string | null;
+          created_at?: string;
+          details?: Json;
+          id?: string;
+          restaurant_id?: string;
+          table_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_logs_restaurant_id_fkey";
+            columns: ["restaurant_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_logs_table_id_fkey";
+            columns: ["table_id"];
+            isOneToOne: false;
+            referencedRelation: "tables";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       device_events: {
         Row: {
           created_at: string;
@@ -156,6 +208,7 @@ export type Database = {
           restaurant_id: string | null;
           role: Database["public"]["Enums"]["user_role"];
           sector: string | null;
+          username: string | null;
         };
         Insert: {
           active?: boolean;
@@ -166,6 +219,7 @@ export type Database = {
           restaurant_id?: string | null;
           role?: Database["public"]["Enums"]["user_role"];
           sector?: string | null;
+          username?: string | null;
         };
         Update: {
           active?: boolean;
@@ -176,6 +230,7 @@ export type Database = {
           restaurant_id?: string | null;
           role?: Database["public"]["Enums"]["user_role"];
           sector?: string | null;
+          username?: string | null;
         };
         Relationships: [
           {
@@ -217,6 +272,7 @@ export type Database = {
         Row: {
           cover_path: string | null;
           created_at: string;
+          google_review_url: string | null;
           id: string;
           logo_path: string | null;
           name: string;
@@ -225,6 +281,7 @@ export type Database = {
         Insert: {
           cover_path?: string | null;
           created_at?: string;
+          google_review_url?: string | null;
           id?: string;
           logo_path?: string | null;
           name: string;
@@ -233,6 +290,7 @@ export type Database = {
         Update: {
           cover_path?: string | null;
           created_at?: string;
+          google_review_url?: string | null;
           id?: string;
           logo_path?: string | null;
           name?: string;
@@ -311,28 +369,83 @@ export type Database = {
           },
         ];
       };
+      table_notes: {
+        Row: {
+          author_id: string;
+          content: string;
+          created_at: string;
+          id: string;
+          restaurant_id: string;
+          table_id: string;
+        };
+        Insert: {
+          author_id: string;
+          content: string;
+          created_at?: string;
+          id?: string;
+          restaurant_id: string;
+          table_id: string;
+        };
+        Update: {
+          author_id?: string;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          restaurant_id?: string;
+          table_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "table_notes_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "table_notes_restaurant_id_fkey";
+            columns: ["restaurant_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "table_notes_table_id_fkey";
+            columns: ["table_id"];
+            isOneToOne: false;
+            referencedRelation: "tables";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tables: {
         Row: {
           created_at: string;
           device_id: string | null;
+          device_last_seen: string | null;
           id: string;
           number: string;
+          priority: boolean;
           restaurant_id: string;
           status: Database["public"]["Enums"]["table_status"];
         };
         Insert: {
           created_at?: string;
           device_id?: string | null;
+          device_last_seen?: string | null;
           id?: string;
           number: string;
+          priority?: boolean;
           restaurant_id: string;
           status?: Database["public"]["Enums"]["table_status"];
         };
         Update: {
           created_at?: string;
           device_id?: string | null;
+          device_last_seen?: string | null;
           id?: string;
           number?: string;
+          priority?: boolean;
           restaurant_id?: string;
           status?: Database["public"]["Enums"]["table_status"];
         };
@@ -358,9 +471,22 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      add_table_note: {
+        Args: { note: string; target: string };
+        Returns: string;
+      };
       current_user_restaurant_id: { Args: never; Returns: string };
       device_gateway: {
-        Args: { event: string; token: string; uid: string };
+        Args: { event: string; event_key?: string; token: string; uid: string };
+        Returns: Json;
+      };
+      operational_report: {
+        Args: {
+          employee?: string;
+          ended?: string;
+          started?: string;
+          unit: string;
+        };
         Returns: Json;
       };
       pair_table_device: { Args: { target: string }; Returns: Json };

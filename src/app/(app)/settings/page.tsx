@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { storeDemoWorkspace, uploadAsset } from "@/services/workspaceService";
 import { roleName, type StaffProfile } from "@/lib/workspace-types";
 import { useTables } from "@/hooks/useTables";
+import { GoogleReviews } from "@/components/settings/GoogleReviews";
 import { DevicePairing } from "@/components/settings/DevicePairing";
 import { TableQRCode } from "@/components/settings/TableQRCode";
 export default function SettingsPage() {
@@ -18,10 +19,12 @@ export default function SettingsPage() {
   const [name, setName] = useState(w.restaurant.name);
   const [staff, setStaff] = useState({
     name: "",
-    email: "",
+    username: "",
     password: "",
     role: "WAITER",
   });
+  const [resetTarget, setResetTarget] = useState<StaffProfile | null>(null);
+  const [newPassword, setNewPassword] = useState("");
   const [unit, setUnit] = useState({ name: "", slug: "", tables: 12 });
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -79,9 +82,10 @@ export default function SettingsPage() {
       <div className="workspace-tabs" role="group" aria-label="Configurações">
         {[
           ["brand", "Identidade visual"],
-          ["team", "Equipe"],
+          ["team", "Equipe e acessos"],
+          ["google", "Google e QR"],
           ["qr", "Links das mesas"],
-          ["devices", "Dispositivos"],
+          ...(w.platformAdmin ? [["devices", "Dispositivos"]] : []),
           ...(w.platformAdmin ? [["units", "Estabelecimentos"]] : []),
         ].map(([key, label]) => (
           <button
@@ -96,6 +100,7 @@ export default function SettingsPage() {
           </button>
         ))}
       </div>
+      {tab === "google" && <GoogleReviews key={w.restaurant.id} />}
       {tab === "brand" && (
         <section className="surface settings-form">
           <h2>Identidade do estabelecimento</h2>
@@ -203,16 +208,35 @@ export default function SettingsPage() {
             <div className="staff-list">
               {w.members.map((member) => (
                 <article className="staff-row" key={member.id}>
+                  <button
+                    className="action-outline"
+                    disabled={
+                      !w.platformAdmin &&
+                      w.profile.role === "MANAGER" &&
+                      member.role !== "WAITER"
+                    }
+                    onClick={() => {
+                      setResetTarget(member);
+                      setNewPassword("");
+                    }}
+                  >
+                    Alterar senha
+                  </button>
                   <AssetImage path={member.avatar_path} name={member.name} />
                   <div>
                     <strong>{member.name}</strong>
                     <small>
+                      {member.username || "Login por e-mail"} ·{" "}
                       {roleName[member.role]} ·{" "}
                       {member.active === false ? "Inativo" : "Ativo"}
                     </small>
                   </div>
                   <input
                     aria-label={`Setor de ${member.name}`}
+                    disabled={
+                      busy ||
+                      (w.profile.role === "MANAGER" && member.role !== "WAITER")
+                    }
                     placeholder="Setor"
                     defaultValue={member.sector || ""}
                     onBlur={(e) => {
@@ -225,7 +249,11 @@ export default function SettingsPage() {
                     }}
                   />
                   <select
-                    disabled={busy || member.id === w.profile.id}
+                    disabled={
+                      busy ||
+                      member.id === w.profile.id ||
+                      (w.profile.role === "MANAGER" && member.role !== "WAITER")
+                    }
                     aria-label={`Papel de ${member.name}`}
                     value={member.role}
                     onChange={(e) =>
@@ -239,7 +267,11 @@ export default function SettingsPage() {
                     {(w.platformAdmin || w.profile.role === "OWNER") && (
                       <option value="OWNER">Administrador</option>
                     )}
-                    <option value="MANAGER">Gerente</option>
+                    {(w.platformAdmin ||
+                      w.profile.role === "OWNER" ||
+                      member.role === "MANAGER") && (
+                      <option value="MANAGER">Gerente</option>
+                    )}
                     <option value="WAITER">Garçom</option>
                   </select>
                   <label className="staff-photo-button">
@@ -247,7 +279,11 @@ export default function SettingsPage() {
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
-                      disabled={busy}
+                      disabled={
+                        busy ||
+                        (w.profile.role === "MANAGER" &&
+                          member.role !== "WAITER")
+                      }
                       onChange={(e) => {
                         const f = e.target.files?.[0];
                         if (f)
@@ -266,7 +302,11 @@ export default function SettingsPage() {
                   </label>
                   <button
                     className="action-outline"
-                    disabled={busy || member.id === w.profile.id}
+                    disabled={
+                      busy ||
+                      member.id === w.profile.id ||
+                      (w.profile.role === "MANAGER" && member.role !== "WAITER")
+                    }
                     onClick={() =>
                       void run(() =>
                         saveMember(member, { active: member.active === false }),
@@ -279,6 +319,54 @@ export default function SettingsPage() {
               ))}
             </div>
           </section>
+          {resetTarget && (
+            <form
+              className="surface settings-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void run(async () => {
+                  await invoke({
+                    action: "reset_password",
+                    user_id: resetTarget.id,
+                    password: newPassword,
+                  });
+                  setNewPassword("");
+                  setResetTarget(null);
+                });
+              }}
+            >
+              <h2>Nova senha de {resetTarget.name}</h2>
+              <p>
+                A senha atual nunca pode ser consultada. Entregue a nova senha
+                diretamente à pessoa.
+              </p>
+              <label>
+                Nova senha
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  maxLength={128}
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </label>
+              <button className="action-solid" disabled={busy}>
+                Salvar nova senha
+              </button>
+              <button
+                type="button"
+                className="action-outline"
+                onClick={() => {
+                  setResetTarget(null);
+                  setNewPassword("");
+                }}
+              >
+                Cancelar
+              </button>
+            </form>
+          )}
           <form
             className="surface settings-form"
             onSubmit={(e) => {
@@ -289,7 +377,12 @@ export default function SettingsPage() {
                   restaurant_id: w.restaurant.id,
                   ...staff,
                 });
-                setStaff({ name: "", email: "", password: "", role: "WAITER" });
+                setStaff({
+                  name: "",
+                  username: "",
+                  password: "",
+                  role: "WAITER",
+                });
               });
             }}
           >
@@ -305,13 +398,18 @@ export default function SettingsPage() {
                 />
               </label>
               <label>
-                E-mail
+                Login exclusivo
                 <input
-                  type="email"
+                  type="text"
+                  pattern="[a-z0-9][a-z0-9._-]{2,59}"
+                  autoCapitalize="none"
                   required
-                  value={staff.email}
+                  value={staff.username}
                   onChange={(e) =>
-                    setStaff({ ...staff, email: e.target.value })
+                    setStaff({
+                      ...staff,
+                      username: e.target.value.toLowerCase(),
+                    })
                   }
                 />
               </label>
@@ -356,7 +454,7 @@ export default function SettingsPage() {
           </form>
         </>
       )}
-      {tab === "devices" && <DevicePairing />}
+      {tab === "devices" && w.platformAdmin && <DevicePairing />}
       {tab === "qr" && (
         <section className="surface">
           <h2>Avaliação por mesa</h2>

@@ -59,7 +59,7 @@ export default function DashboardPage() {
           <strong>
             {m.rating === null ? "—" : m.rating.toFixed(1).replace(".", ",")}
           </strong>
-          <small>{history.evaluations.length} avaliações hoje</small>
+          <small>{history.feedbackCount} avaliações hoje</small>
         </div>
         <div>
           <span>Mesas com chamado</span>

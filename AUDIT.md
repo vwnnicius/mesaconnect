@@ -1,3 +1,19 @@
+# Atualização operacional — 7 de outubro de 2026
+
+Corrigido o transbordamento da lista de mesas e o inspetor sobreposto ao alternar entre edição e lista. Layout responsivo verificado em 1280, 390 e 320 px.
+
+Implementados relatórios mensais, histórico completo e filtro por funcionário, agregados no PostgreSQL sem limite de 1.000 registros. Ranking operacional por respostas até 2 minutos e mediana, com amostra mínima de 3 atendimentos; avaliações de funcionário somente quando vinculadas a um chamado desse funcionário.
+
+Observações de mesa, logs de atividade, prioridade definida pela gestão, Tela de status com alerta discreto, atraso após 5 minutos, tela cheia e som optativo. Modo escuro, fontes Manrope/Fraunces locais e animação com respeito a movimento reduzido. Google Reviews tem link configurável e QR automático; a opção aparece independentemente da nota interna.
+
+Duas contas administrativas gerais e três unidades fictícias separadas: Aurora, Brasa & Lenha e Jardim da Mesa; cada unidade tem proprietário, gerente e três garçons. A equipe usa login e senha; gerente cria/redefine acesso de garçom, proprietário gerencia gerentes. Credenciais entregues em arquivo local privado, fora do Git. Provisionamento executa perfil explícito após criação no Auth, pois o gatilho de inscrição pode rodar antes dos metadados administrativos.
+
+Dispositivos restritos a administradores gerais. Gateway aceita event_id para reenvio seguro, retorna estado atual para LED e registra última comunicação. Exemplo de firmware e guia estão em firmware/mesaconnect-esp32. Testes de banco confirmam reenvio após conclusão sem novo chamado. Compilação e ensaio físico do ESP32 ainda não foram realizados.
+
+Pendências de campo: reconexão Realtime, cobertura e alimentação do hardware, persistência da fila após desligar a placa e proteção adicional contra abuso das avaliações públicas. As listagens individuais ainda podem exigir paginação além de 1.000 itens; os relatórios agregados não têm essa restrição. Proteção de senhas vazadas no Supabase permanece desativada.
+
+---
+
 # Situação após a reconstrução — 7 de outubro de 2026
 
 A auditoria original abaixo registra o ponto de partida. Nesta revisão houve acesso ao Supabase real, implantação de cinco migrações e validação de isolamento e fluxo em transações revertidas.

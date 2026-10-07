@@ -1,30 +1,29 @@
-# Validação — reconstrução MesaConnect
+# Validação — atualização operacional MesaConnect
 
-Data: 7 de outubro de 2026. Windows, Next.js 15.5.27, Supabase real configurado.
+Data: 7 de outubro de 2026. Next.js 15.5.27, Windows e Supabase real.
 
-## Implementação
+- Lint e TypeScript aprovados, sem avisos. 14 testes automatizados aprovados. Incluem limites mensais, mudança de ano e rejeição de mês inválido.
+- Build de produção aprovado, 21 páginas geradas.
+- tests/operations-security.sql executado com ROLLBACK: observações, bloqueio de prioridade para garçom, isolamento dos logs, autenticação do dispositivo, estado para LED, última comunicação, agregação e repetição de evento após conclusão sem outro chamado.
+- Consulta de gerente: relatório da própria unidade permitido; relatório externo e pareamento rejeitados.
+- Logins reais verificados: administrador parceiro, proprietário e gerente Aurora, um garçom de cada uma das três unidades. Leitura de mesas isolada e consulta de permissão da função administrativa verificadas, sem novas contas nesse teste.
+- Confirmados dois administradores gerais; cada unidade fictícia tem 1 proprietário, 1 gerente e 3 garçons ativos.
+- Oito migrações aplicadas; versões locais alinhadas ao histórico remoto. workspace-admin versão 4 publicada.
+- Salão → lista e personalização → lista verificados em navegador; inspetor removido e sem transbordamento horizontal em 1280, 390 e 320 px. Modo escuro e Tela cheia revisados.
+- Validação do link Google corrigida e testada no banco: URL oficial resolvida publicamente; domínio externo rejeitado.
+- Demo em produção local verificada: cliente chama, garçom assume e conclui, convite opcional para avaliação.
+- Senhas dos exemplos ausentes dos arquivos do repositório; secrets.h e .pio ignorados.
 
-Identidade em branco quente, grafite e verde; login com fotografia editorial; chamadas mobile com ações amplas; planta editável persistida por estabelecimento; simulador de mesas, avaliações públicas e gerenciais, métricas reais, QR gráfico com download, identidade e fotos da equipe. Demo isolada preservada.
+## Limites da verificação
 
-A conta geral informada foi verificada e habilitada com metadado administrativo confiável. Contas da equipe têm estabelecimento, papel e situação ativos próprios. Senhas e chaves administrativas não estão no repositório.
+ESP32 físico e compilação do firmware não realizados; exemplo requer ensaio da placa adotada. Reconexão e cobertura de Wi-Fi/Realtime precisam de teste de campo. Não houve redefinição real de senha nem criação adicional de conta no teste final da função administrativa. A revisão automática rejeitou um teste de criação privilegiada; foi substituído por consultas de permissão sem criação.
 
-## Verificações
+Os indicadores das empresas fictícias começam sem histórico; a demo pública mostra o fluxo sem gravar dados na operação. Ranking exige amostra mínima e não inventa notas individuais. Google Reviews exige link real cadastrado pela gestão.
 
-- Lint: aprovado, sem erros ou avisos.
-- TypeScript: aprovado.
-- Testes automatizados: 12 aprovados; ciclo, duplicidade, reset durante chamado, credencial de dispositivo, falhas sem fallback, layout e métricas.
-- Testes SQL no Supabase real: aprovados; execução com ROLLBACK, sem registros de teste persistidos. Cobrem CALLING→ACKNOWLEDGED→COMPLETED, duplicidade, isolamento entre unidades, bloqueio de autopromoção, pareamento, token inválido e avaliação pública limitada. Fonte: tests/tenant-security.sql.
-- Cinco migrações aplicadas no projeto fhbnowqaencrloimnvyt, com versões locais alinhadas ao histórico remoto. workspace-admin publicado, autenticação e acesso geral verificados.
-- Quatro inconsistências legadas corrigidas. Verificação final: zero mesas com estado divergente do chamado ativo.
-- Planta salva e recuperada do banco. QR gráfico gerado no navegador. Telas revisadas em desktop e em 390 px: chamados, configurações e avaliação sem transbordamento horizontal.
-- Build de produção: aprovado; 18 páginas geradas, rotas dinâmicas e tipos verificados.
+## Avisos do Supabase
 
-## Limites conhecidos
+As tabelas privadas de credenciais e recibos não têm políticas de acesso direto intencionalmente; somente funções restritas usam seus dados. Funções públicas de QR/avaliação e gateway são intencionais e limitadas; gateway exige token individual com hash. Funções gerenciais validam unidade/papel no banco.
 
-Não houve ensaio com ESP32 físico, envio real de e-mail de recuperação, criação de contas adicionais de equipe ou upload de fotos pessoais durante a validação. Realtime de avaliações foi incluído na publicação; falhas e reconexão em redes instáveis ainda precisam de teste de campo.
+A [proteção de senhas vazadas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) permanece desativada. Avisos de dependências anteriores exigem atualização planejada, sem forçar mudança principal nesta revisão.
 
-npm audit mantém 11 advisories (8 altos, 3 moderados), nas cadeias de Next/PostCSS, Tailwind e ESLint. A atualização compatível foi tentada; correções restantes envolvem versões principais e precisam de revisão própria. Não foi executada atualização forçada.
-
-Advisors Supabase: as três funções públicas SECURITY DEFINER são intencionais (entrada com token de dispositivo, resolução segura do QR e envio limitado de nota). As seis funções autenticadas exigem autorização própria. Credenciais privadas não têm políticas de acesso direto, intencionalmente. Proteção contra senha vazada permanece desativada no projeto: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
-
-As limitações de hardware, volume histórico, abuso de avaliações e configuração de recuperação estão em docs/OPERACAO-E-HARDWARE.md.
+Fontes distribuídas localmente com OFL: [Manrope](https://github.com/google/fonts/tree/main/ofl/manrope), [Fraunces](https://github.com/google/fonts/tree/main/ofl/fraunces).

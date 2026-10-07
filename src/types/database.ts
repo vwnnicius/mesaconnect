@@ -26,6 +26,7 @@ export interface Restaurant {
   id: string;
   name: string;
   slug: string;
+  google_review_url?: string | null;
   created_at: string;
 }
 
@@ -33,6 +34,7 @@ export interface Profile {
   id: string;
   restaurant_id: string;
   name: string;
+  username?: string | null;
   role: UserRole;
   created_at: string;
 }
@@ -41,6 +43,8 @@ export interface Table {
   id: string;
   restaurant_id: string;
   number: string;
+  priority?: boolean;
+  device_last_seen?: string | null;
   device_id: string | null;
   status: TableStatus;
   created_at: string;
@@ -89,6 +93,8 @@ export interface Evaluation {
 
 export interface DeviceEvent {
   id: string;
+  priority?: boolean;
+  device_last_seen?: string | null;
   device_id: string | null;
   table_id: string | null;
   event_type: "CALL" | "DO_NOT_DISTURB" | "RESET" | "HEARTBEAT" | string;

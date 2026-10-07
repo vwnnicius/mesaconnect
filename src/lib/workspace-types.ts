@@ -15,7 +15,7 @@ export interface RestaurantSettings {
   updated_at?: string;
 }
 export const roleName = {
-  OWNER: "Administrador",
+  OWNER: "Proprietário",
   MANAGER: "Gerente",
   WAITER: "Garçom",
 };

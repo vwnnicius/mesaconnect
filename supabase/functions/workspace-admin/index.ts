@@ -26,7 +26,7 @@ Deno.serve(async (request: Request) => {
     .select("restaurant_id,role,active")
     .eq("id", auth.user.id)
     .single();
-  if (!global && (!actor?.active || !["OWNER", "MANAGER"].includes(actor.role)))
+  if (!actor?.active || (!global && !["OWNER", "MANAGER"].includes(actor.role)))
     return reply({ error: "Sem permissão" }, 403);
   try {
     const body = await request.json();
@@ -75,6 +75,89 @@ Deno.serve(async (request: Request) => {
         );
       return reply({ id: data.id }, 201);
     }
+    if (body.action === "reset_password") {
+      const { data: target } = await admin
+        .from("profiles")
+        .select("id,restaurant_id,role,active")
+        .eq("id", body.user_id)
+        .single();
+      if (
+        !target ||
+        !actor?.active ||
+        (!global &&
+          (target.restaurant_id !== actor.restaurant_id ||
+            (actor.role === "MANAGER" && target.role !== "WAITER")))
+      )
+        return reply({ error: "Sem permissão para alterar este acesso" }, 403);
+      const { data: targetAuth } = await admin.auth.admin.getUserById(
+        target.id,
+      );
+      if (targetAuth.user?.app_metadata.platform_admin && !global)
+        return reply({ error: "Acesso protegido" }, 403);
+      if (
+        typeof body.password !== "string" ||
+        body.password.length < 12 ||
+        body.password.length > 128 ||
+        body.password.length > 128
+      )
+        return reply({ error: "Use de 12 a 128 caracteres" }, 400);
+      const { error } = await admin.auth.admin.updateUserById(target.id, {
+        password: body.password,
+      });
+      if (error)
+        return reply({ error: "Não foi possível alterar a senha" }, 400);
+      if (target.restaurant_id)
+        await admin.from("activity_logs").insert({
+          restaurant_id: target.restaurant_id,
+          actor_id: auth.user.id,
+          action: "PASSWORD_RESET",
+          details: { user_id: target.id },
+        });
+      return reply({ ok: true });
+    }
+    if (body.action === "create_platform_admin") {
+      if (!global) return reply({ error: "Somente administrador geral" }, 403);
+      const username = String(body.username || "")
+        .toLowerCase()
+        .trim();
+      if (
+        !/^[a-z0-9][a-z0-9._-]{2,59}$/.test(username) ||
+        !body.name ||
+        typeof body.password !== "string" ||
+        body.password.length < 12 ||
+        body.password.length > 128
+      )
+        return reply({ error: "Dados inválidos" }, 400);
+      const { data, error } = await admin.auth.admin.createUser({
+        email: username + "@login.mesaconnect.invalid",
+        password: body.password,
+        email_confirm: true,
+        app_metadata: { platform_admin: true, role: "OWNER", username },
+        user_metadata: { name: String(body.name).slice(0, 100) },
+      });
+      if (!error && data.user) {
+        const { error: profileError } = await admin
+          .from("profiles")
+          .upsert({
+            id: data.user.id,
+            restaurant_id: null,
+            name: String(body.name).slice(0, 100),
+            role: "OWNER",
+            username,
+            active: true,
+          });
+        if (profileError)
+          return reply(
+            {
+              error: "Conta criada; perfil pendente. Contate o administrador.",
+            },
+            409,
+          );
+      }
+      return error
+        ? reply({ error: "Não foi possível criar o acesso geral" }, 400)
+        : reply({ id: data.user.id }, 201);
+    }
     if (body.action !== "create_staff")
       return reply({ error: "Ação inválida" }, 400);
     const unit = body.restaurant_id;
@@ -86,12 +169,13 @@ Deno.serve(async (request: Request) => {
         : ["WAITER"];
     if (
       !roles.includes(body.role) ||
-      typeof body.email !== "string" ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email) ||
+      typeof body.username !== "string" ||
+      !/^[a-z0-9][a-z0-9._-]{2,59}$/.test(body.username) ||
       typeof body.name !== "string" ||
       !body.name.trim() ||
       typeof body.password !== "string" ||
-      body.password.length < 12
+      body.password.length < 12 ||
+      body.password.length > 128
     )
       return reply(
         {
@@ -107,17 +191,45 @@ Deno.serve(async (request: Request) => {
       .single();
     if (!unitData) return reply({ error: "Estabelecimento inválido" }, 400);
     const { data, error } = await admin.auth.admin.createUser({
-      email: body.email.trim(),
+      email: body.username + "@login.mesaconnect.invalid",
       password: body.password,
       email_confirm: true,
-      app_metadata: { restaurant_id: unit, role: body.role },
+      app_metadata: {
+        restaurant_id: unit,
+        role: body.role,
+        username: body.username,
+      },
       user_metadata: { name: body.name.trim().slice(0, 100) },
     });
+    if (!error && data.user) {
+      const { error: profileError } = await admin
+        .from("profiles")
+        .upsert({
+          id: data.user.id,
+          restaurant_id: unit,
+          name: body.name.trim().slice(0, 100),
+          role: body.role,
+          username: body.username,
+          active: true,
+        });
+      if (profileError)
+        return reply(
+          { error: "Conta criada; perfil pendente. Contate o administrador." },
+          409,
+        );
+    }
+    if (!error && data.user)
+      await admin.from("activity_logs").insert({
+        restaurant_id: unit,
+        actor_id: auth.user.id,
+        action: "STAFF_CREATED",
+        details: { user_id: data.user.id, role: body.role },
+      });
     return error
       ? reply(
           {
             error:
-              "Não foi possível criar o usuário. Verifique se o e-mail já possui uma conta.",
+              "Não foi possível criar o usuário. Verifique se o login já possui uma conta.",
           },
           400,
         )

@@ -62,3 +62,20 @@ O serviço mantém o hash da credencial em um esquema privado. A placa não prec
 As referências foram implementadas diretamente no frontend: fundo quente, verde sóbrio, tipografia de sistema e títulos editoriais na visão geral e login; estados funcionais em verde, âmbar, azul, vermelho e cinza. Não foi utilizado slogan em inglês.
 
 Foto de entrada: `public/images/restaurant-hospitality.png`, criada com a ferramenta integrada imagegen e servida com otimização de imagem do Next.js. Prompt: fotografia editorial realista de restaurante brasileiro contemporâneo, paredes claras, mesas de carvalho, cadeiras verde sálvia, luz natural, vidro e cerâmica, sem pessoas, texto, logos ou interface. A imagem pode ser substituída por uma fotografia real da marca. O Lovable não expôs ações executáveis nesta sessão; o design foi construído no repositório existente.
+
+
+## Novos acessos e operação
+
+Administrador geral acessa todas as unidades e dispositivos. Proprietário acessa apenas sua unidade e cria gerentes/garçons; gerente cria e redefine senha de garçons; garçom vê fila, mesas, observações, perfil e Tela. O login simples é traduzido internamente para um identificador do Supabase Auth; ninguém precisa informar e-mail pessoal para usar a equipe. Não desative a confirmação ou a validação de papéis no servidor.
+
+Os exemplos Aurora, Brasa & Lenha e Jardim da Mesa são unidades fictícias isoladas, com plantas diferentes e cinco usuários cada. As senhas não estão neste documento. Use o arquivo privado entregue no computador.
+
+Em Configurações → Google e QR, adicione o link HTTPS oficial de avaliação do estabelecimento. O QR é gerado automaticamente após salvar. O cliente pode avaliar no Google independentemente da nota dada no MesaConnect. Não use link inventado para empresas fictícias.
+
+Em Desempenho, selecione mês ou histórico completo e um funcionário. Ranking mede resposta operacional, não determina sozinho qualidade do trabalho. Avaliação genérica da mesa não é atribuída artificialmente a um funcionário.
+
+A Tela destaca chamados, prioridade definida pela gestão e espera acima de cinco minutos. Som só funciona após ativação explícita. Dispositivo sem comunicação recente (90 segundos) recebe aviso; isso não apaga chamados ativos.
+
+Firmware e instalação: [guia do ESP32](../firmware/mesaconnect-esp32/README.md). Wi-Fi clássico de 2,4 GHz, HTTPS com certificado válido, token próprio e heartbeat de 30 segundos. Não colocar credenciais no Git. O ensaio com placa física continua necessário antes da operação real.
+
+Evoluções sugeridas: atribuição por turno/setor, notificações PWA, fila persistente no dispositivo, monitoramento de bateria e QR por sessão para reduzir abuso e associar feedback ao atendimento correto.

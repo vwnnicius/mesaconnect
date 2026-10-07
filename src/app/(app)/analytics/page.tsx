@@ -5,8 +5,16 @@ import { useWorkspace } from "@/providers/WorkspaceProvider";
 import { PageHeader } from "@/components/ui/PageHeader";
 export default function AnalyticsPage() {
   const [days, setDays] = useState(1);
-  const { metrics: m, evaluations, loading, error } = useOperationMetrics(days);
-  const { manager } = useWorkspace();
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [employee, setEmployee] = useState("");
+  const {
+    metrics: m,
+    feedbackCount,
+    ranks,
+    loading,
+    error,
+  } = useOperationMetrics(days, month, employee);
+  const { manager, members } = useWorkspace();
   if (!manager) return <p>Relatórios disponíveis para a administração.</p>;
   const time = (n: number | null) =>
     n === null ? "—" : `${(n / 60).toFixed(1).replace(".", ",")} min`;
@@ -25,9 +33,38 @@ export default function AnalyticsPage() {
             <option value={1}>Hoje</option>
             <option value={7}>Últimos 7 dias</option>
             <option value={30}>Últimos 30 dias</option>
+            <option value={-1}>Por mês</option>
+            <option value={0}>Todo o histórico</option>
           </select>
         }
       />
+      <div className="report-filters">
+        {days === -1 && (
+          <label>
+            Mês
+            <input
+              type="month"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+            />
+          </label>
+        )}
+        <label>
+          Funcionário
+          <select
+            aria-label="Funcionário nos relatórios"
+            value={employee}
+            onChange={(e) => setEmployee(e.target.value)}
+          >
+            <option value="">Toda a equipe</option>
+            {members.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       {error && (
         <p role="alert" className="form-error">
           {error}
@@ -74,16 +111,14 @@ export default function AnalyticsPage() {
               </div>
             ))}
           </div>
-          <p className="section-description">
-            Horários exibidos no fuso do seu dispositivo.
-          </p>
+          <p className="section-description">Horários de Brasília.</p>
         </section>
         <section className="surface rating-average">
           <h2>A experiência do cliente</h2>
           <strong>
             {m.rating === null ? "—" : m.rating.toFixed(1).replace(".", ",")}
           </strong>
-          <p>{evaluations.length} avaliações no período</p>
+          <p>{feedbackCount} avaliações no período</p>
           <p className="mt-4">
             {m.sla === null
               ? "Ainda não há aceites suficientes para medir o prazo."
@@ -91,9 +126,42 @@ export default function AnalyticsPage() {
           </p>
         </section>
       </div>
+      <section className="surface">
+        <h2>Ranking de atendimento</h2>
+        <p className="section-description">
+          Ordem: prazo de até 2 minutos, mediana de resposta e conclusões.
+          Mínimo de 3 aceites para comparação. É um indicador operacional, não
+          uma avaliação automática das pessoas.
+        </p>
+        <div className="rank-list">
+          {ranks.map((r, i) => (
+            <article key={r.id}>
+              <span>
+                {r.accepted >= 3 ? String(i + 1).padStart(2, "0") : "—"}
+              </span>
+              <div>
+                <strong>{r.name}</strong>
+                <small>
+                  {r.completed} concluídos · {r.accepted} aceites
+                </small>
+              </div>
+              <div>
+                <strong>{r.sla === null ? "—" : `${r.sla}% no prazo`}</strong>
+                <small>
+                  {r.accepted < 3
+                    ? "Amostra insuficiente"
+                    : `Mediana ${time(r.median)}`}
+                </small>
+              </div>
+            </article>
+          ))}
+        </div>
+        {!ranks.length && <p>Nenhum garçom cadastrado.</p>}
+      </section>
       <p className="section-description">
-        Médias consideram apenas etapas concluídas. O período mostra até 10.000
-        chamados; volumes maiores exigem agregação no banco.
+        Métricas agregadas no banco sobre todo o período. Atribuição por
+        funcionário segue quem assumiu o chamado. Avaliações sem vínculo a um
+        atendimento permanecem apenas no relatório geral.
       </p>
     </div>
   );

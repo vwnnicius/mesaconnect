@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTables } from "@/hooks/useTables";
 import { useCalls } from "@/hooks/useCalls";
 import { CallCard } from "@/components/calls/CallCard";
 import { RotateCw } from "lucide-react";
@@ -11,6 +12,8 @@ import { useWorkspace } from "@/providers/WorkspaceProvider";
 
 export default function CallsPage() {
   const { calls, loading, error, refresh, acknowledge, complete } = useCalls();
+  const { tables } = useTables();
+  const priority = new Set(tables.filter((t) => t.priority).map((t) => t.id));
   const { profile, manager, demo } = useWorkspace();
   const [filter, setFilter] = useState<"ALL" | "CALLING" | "ACKNOWLEDGED">(
     "ALL",
@@ -23,24 +26,30 @@ export default function CallsPage() {
       (manager || demo || c.acknowledged_by === profile.id),
   );
 
-  const filteredCalls = calls.filter((c) => {
-    if (filter === "CALLING") return c.status === "CALLING";
-    if (filter === "ACKNOWLEDGED")
-      return acknowledgedCalls.some((item) => item.id === c.id);
-    return (
-      c.status === "CALLING" ||
-      manager ||
-      demo ||
-      c.acknowledged_by === profile.id
+  const filteredCalls = calls
+    .filter((c) => {
+      if (filter === "CALLING") return c.status === "CALLING";
+      if (filter === "ACKNOWLEDGED")
+        return acknowledgedCalls.some((item) => item.id === c.id);
+      return (
+        c.status === "CALLING" ||
+        manager ||
+        demo ||
+        c.acknowledged_by === profile.id
+      );
+    })
+    .sort(
+      (a, b) =>
+        Number(priority.has(b.table_id)) - Number(priority.has(a.table_id)) ||
+        Date.parse(a.requested_at) - Date.parse(b.requested_at),
     );
-  });
 
   return (
     <div className="max-w-2xl mx-auto space-y-7">
       <PageHeader
         kicker="Fila do garçom"
         title="Chamados"
-        description="As mesas que esperam há mais tempo aparecem primeiro."
+        description="Prioridades primeiro. Depois, as mesas que esperam há mais tempo."
         actions={
           <>
             <Button
@@ -116,11 +125,13 @@ export default function CallsPage() {
               ? "Nenhuma mesa precisa de atendimento agora."
               : "Não há chamados neste filtro."}
           </p>
-          <Link href="/simulator" className="inline-block mt-4">
-            <Button size="sm" variant="accent">
-              Abrir simulador
-            </Button>
-          </Link>
+          {manager && (
+            <Link href="/simulator" className="inline-block mt-4">
+              <Button size="sm" variant="accent">
+                Abrir simulador
+              </Button>
+            </Link>
+          )}
         </div>
       ) : (
         <div className="calls-list">
@@ -128,6 +139,7 @@ export default function CallsPage() {
             <CallCard
               key={call.id}
               call={call}
+              priority={priority.has(call.table_id)}
               onAcknowledge={acknowledge}
               onComplete={complete}
             />

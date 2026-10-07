@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -20,20 +21,38 @@ export default function LoginPage() {
     try {
       if (isSupabaseConfigured()) {
         const { error } = await createClient().auth.signInWithPassword({
-          email: email.trim(),
+          email: email.includes("@")
+            ? email.trim()
+            : `${email.trim().toLowerCase()}@login.mesaconnect.invalid`,
           password,
         });
         if (error) throw error;
       }
-      router.push("/dashboard");
+      if (!isSupabaseConfigured()) {
+        router.push("/dashboard");
+        return;
+      }
+      const { data: who } = await createClient().auth.getUser();
+      const { data: profile } = await createClient()
+        .from("profiles")
+        .select("role")
+        .eq("id", who.user?.id || "")
+        .maybeSingle();
+      router.push(profile?.role === "WAITER" ? "/calls" : "/dashboard");
       router.refresh();
     } catch {
-      setMessage("Não foi possível entrar. Confira o e-mail e a senha.");
+      setMessage("Não foi possível entrar. Confira o login e a senha.");
     } finally {
       setBusy(false);
     }
   };
   const reset = async () => {
+    if (!email.includes("@")) {
+      setMessage(
+        "Para recuperar seu login, contate o gerente. Administradores com e-mail podem receber um link.",
+      );
+      return;
+    }
     if (!email.trim()) {
       setMessage("Preencha seu e-mail para receber o link de recuperação.");
       return;
@@ -56,6 +75,9 @@ export default function LoginPage() {
   };
   return (
     <main className="login-page">
+      <div className="login-theme">
+        <ThemeToggle />
+      </div>
       <section className="login-story">
         <Image
           src="/images/restaurant-hospitality.png"
@@ -109,14 +131,15 @@ export default function LoginPage() {
             Entre na sua conta para acompanhar o atendimento do seu restaurante.
           </p>
           <form onSubmit={login}>
-            <label htmlFor="login-email">E-mail</label>
+            <label htmlFor="login-email">Login ou e-mail</label>
             <input
               id="login-email"
-              type="email"
+              type="text"
               autoComplete="username"
+              autoCapitalize="none"
               required
               value={email}
-              placeholder="voce@restaurante.com.br"
+              placeholder="empresa.seu-login"
               onChange={(e) => setEmail(e.target.value)}
             />
             <label htmlFor="login-password">Senha</label>

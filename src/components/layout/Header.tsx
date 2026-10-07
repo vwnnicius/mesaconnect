@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Bell } from "lucide-react";
 import { useCalls } from "@/hooks/useCalls";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
@@ -36,6 +37,7 @@ export function Header() {
         {demo && <small>Demo</small>}
       </div>
       <div className="workspace-header-right">
+        <ThemeToggle />
         <span className="workspace-date">
           {new Date().toLocaleDateString("pt-BR", {
             weekday: "short",

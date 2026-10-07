@@ -9,6 +9,7 @@ export interface DeviceEventPayload {
   event_type: DeviceEventType;
   token?: string;
   timestamp?: string;
+  event_id?: string;
   payload?: unknown;
 }
 export interface DeviceEventResult {
@@ -17,6 +18,8 @@ export interface DeviceEventResult {
   table_id?: string;
   table_number?: string;
   call_id?: string;
+  table_status?: string;
+  priority?: boolean;
 }
 // Both authenticated simulator and physical devices enter the same transactional database service.
 export async function simulateTableEvent(
@@ -76,6 +79,7 @@ export async function processDeviceEvent(
     uid: event.device_uid,
     token: event.token,
     event: event.event_type,
+    ...(event.event_id ? { event_key: event.event_id } : {}),
   });
   return error
     ? {

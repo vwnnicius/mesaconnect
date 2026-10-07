@@ -37,3 +37,6 @@ npm-audit-local.json
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+firmware/**/secrets.h
+firmware/**/.pio/

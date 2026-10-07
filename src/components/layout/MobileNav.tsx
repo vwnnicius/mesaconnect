@@ -11,7 +11,7 @@ import { useWorkspace } from "@/providers/WorkspaceProvider";
 
 export function MobileNav() {
   const pathname = usePathname();
-  const { manager } = useWorkspace();
+  const { manager, platformAdmin } = useWorkspace();
   const [moreOpen, setMoreOpen] = useState(false);
   const { calls } = useCalls();
   const callingCount = calls.filter((c) => c.status === "CALLING").length;
@@ -19,7 +19,11 @@ export function MobileNav() {
   const items = [
     { name: "Chamados", href: "/calls", icon: BellRing, badge: callingCount },
     { name: "Salão", href: "/tables", icon: Grid3X3 },
-    { name: "Painel", href: "/dashboard", icon: LayoutDashboard },
+    {
+      name: manager ? "Painel" : "Tela",
+      href: manager ? "/dashboard" : "/screen",
+      icon: LayoutDashboard,
+    },
   ];
 
   return (
@@ -35,14 +39,17 @@ export function MobileNav() {
           {[
             ["Demo interativa", "/demo"],
             ["Seu perfil", "/profile"],
+            ["Tela", "/screen"],
             ...(manager
               ? [
                   ["Relatórios", "/analytics"],
+                  ["Atividade", "/activity"],
                   ["Avaliações", "/evaluations"],
                   ["Simulador", "/simulator"],
                   ["Configurações", "/settings"],
                 ]
               : []),
+            ...(platformAdmin ? [["Dispositivos", "/devices"]] : []),
             ["Login", "/login"],
           ].map(([name, href]) => (
             <Link
