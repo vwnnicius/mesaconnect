@@ -27,3 +27,13 @@ As tabelas privadas de credenciais e recibos não têm políticas de acesso dire
 A [proteção de senhas vazadas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) permanece desativada. Avisos de dependências anteriores exigem atualização planejada, sem forçar mudança principal nesta revisão.
 
 Fontes distribuídas localmente com OFL: [Manrope](https://github.com/google/fonts/tree/main/ofl/manrope), [Fraunces](https://github.com/google/fonts/tree/main/ofl/fraunces).
+
+## Correção de sincronização e tema — revisão seguinte
+
+Publicação Realtime das mesas/chamados confirmada. Assinatura autenticada testada com alteração e restauração da prioridade de uma mesa fictícia. O cliente agora busca uma nova fotografia após SUBSCRIBED/reconexão, retoma ao focar/voltar online e verifica a cada 10 segundos enquanto visível. A Tela também acompanha mudanças de chamados; respostas antigas não sobrescrevem uma consulta mais recente. Erro ao cruzar chamados não é tratado como sucesso.
+
+Teste visual em dois painéis: simulador criou chamado na mesa 02 de Aurora, Tela mudou sem reload; aceite recebido em aproximadamente 2,5 segundos, conclusão em 1,8 segundo. O chamado de teste foi concluído e permanece no histórico da empresa fictícia. Outras mesas não foram resetadas.
+
+Demo escura corrigida, incluindo planta e dispositivo. Tema por classe, sem conflito com preferência do sistema. Barra lateral pode ser escondida/mostrada e preferência persiste. Responsividade da Tela verificada em 390 px sem transbordamento. 15 logins fictícios redefinidos com senhas genéricas distintas e verificados; lista privada fora do repositório.
+
+Lovable localizado no catálogo, porém não instalado/conectado nesta sessão. Ajustes aplicados no código existente; não foi alegado uso do Lovable.

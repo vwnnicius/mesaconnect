@@ -6,7 +6,7 @@ import { useWorkspace } from "@/providers/WorkspaceProvider";
 import { TABLE_STATUS_CONFIG } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 export default function ScreenPage() {
-  const { tables, loading, error } = useTables();
+  const { tables, loading, error, liveStatus } = useTables();
   const { calls } = useCalls();
   const w = useWorkspace();
   const [now, setNow] = useState(Date.now());
@@ -56,7 +56,14 @@ export default function ScreenPage() {
         <div>
           <p className="eyebrow">{w.restaurant.name}</p>
           <h1>Tela do salão</h1>
-          <p>{pending} mesas aguardando · atualização em tempo real</p>
+          <p>
+            {pending} mesas aguardando ·{" "}
+            {liveStatus === "live"
+              ? "Conectado em tempo real"
+              : liveStatus === "recovering"
+                ? "Reconectando · atualização de segurança ativa"
+                : "Conectando ao salão…"}
+          </p>
         </div>
         <div className="wall-actions">
           <ThemeToggle />

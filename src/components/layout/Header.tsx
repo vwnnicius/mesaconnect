@@ -1,12 +1,18 @@
 "use client";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { Bell } from "lucide-react";
+import { Bell, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useCalls } from "@/hooks/useCalls";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
 import { AssetImage } from "@/components/ui/AssetImage";
 import { roleName } from "@/lib/workspace-types";
-export function Header() {
+export function Header({
+  collapsed,
+  toggleSidebar,
+}: {
+  collapsed: boolean;
+  toggleSidebar: () => void;
+}) {
   const { calls } = useCalls();
   const { restaurant, profile, platformAdmin, units, selectUnit, demo } =
     useWorkspace();
@@ -14,6 +20,20 @@ export function Header() {
   return (
     <header className="workspace-header">
       <div className="workspace-unit">
+        <button
+          className="sidebar-toggle"
+          onClick={toggleSidebar}
+          aria-label={
+            collapsed ? "Mostrar barra lateral" : "Esconder barra lateral"
+          }
+          aria-expanded={!collapsed}
+        >
+          {collapsed ? (
+            <PanelLeftOpen size={19} />
+          ) : (
+            <PanelLeftClose size={19} />
+          )}
+        </button>
         <AssetImage
           path={restaurant.logo_path}
           name={restaurant.name}

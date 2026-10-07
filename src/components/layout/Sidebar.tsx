@@ -151,7 +151,10 @@ export function Sidebar() {
               />
             </div>
             <div className="min-w-0">
-              <Link href="/profile" className="text-xs font-medium truncate">
+              <Link
+                href="/profile"
+                className="block max-w-full text-xs font-medium truncate"
+              >
                 {profile.name}
               </Link>
               <p className="text-[11px] text-muted-foreground truncate">

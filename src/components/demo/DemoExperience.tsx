@@ -135,7 +135,11 @@ export function DemoExperience() {
         </Link>
         <span className="demo-label">Experiência interativa</span>
         <ThemeToggle />
-        <Link href="/dashboard" className="demo-back">
+        <Link
+          href="/dashboard"
+          className="demo-back"
+          aria-label="Voltar ao painel"
+        >
           <ArrowLeft size={15} />
           <span>Voltar ao painel</span>
         </Link>

@@ -16,20 +16,6 @@
   --espresso: #202329;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --background: #121419;
-    --foreground: #ecedf0;
-    --card: #191c22;
-    --card-foreground: #ecedf0;
-    --border: #2a2e37;
-    --muted: #a1a7b2;
-    --accent: #38645f;
-    --espresso: #202329;
-  }
-}
-
 html {
   scroll-behavior: smooth;
 }
@@ -123,7 +109,7 @@ textarea {
   color: var(--muted);
 }
 .editorial-word {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-weight: 400;
   font-style: italic;
 }
@@ -824,7 +810,7 @@ textarea {
   border-radius: 50%;
   background: #e6eadf;
   color: #5e6b4e;
-  font-family: Georgia, serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: 11px;
   display: flex;
   justify-content: center;
@@ -1012,62 +998,31 @@ textarea {
   font-size: 9px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .floor-plan {
-    --floor: #292d2b;
-    --furniture: #383f38;
-    --floor-text: #f0f1e9;
-    --floor-line: #404740;
-  }
-  .floor-bar {
-    background: #333a33;
-    border-color: #485045;
-  }
-  .floor-seat:hover {
-    background: #31382e;
-  }
-  .floor-seat-selected {
-    background: #364535;
-    border-color: #84957e;
-  }
-  .floor-chair {
-    background: #535e4e;
-    border-color: #65705e;
-  }
-  .floor-furniture {
-    border-color: #65705e;
-  }
-  .demo-experience .floor-plan {
-    --floor: #eeeae1;
-    --furniture: #fffdf7;
-    --floor-text: #383d34;
-    --floor-line: #d8d5cb;
-  }
-  .demo-experience .floor-bar {
-    background: #e4dfd2;
-    border-color: #d5d1c5;
-  }
-  .demo-experience .floor-seat:hover {
-    background: #e4e0d7;
-  }
-  .demo-experience .floor-seat-selected {
-    background: #e5e8de;
-    border-color: #42665b;
-  }
-  .demo-experience .floor-chair {
-    background: #e8e2d3;
-    border-color: #d0cabc;
-  }
-  .demo-experience .floor-furniture {
-    border-color: #c7c8b9;
-  }
-  .demo-experience .floor-seat[data-status="CALLING"] .floor-furniture {
-    border-color: #b28c5d;
-  }
-  .demo-experience .floor-seat[data-status="ACKNOWLEDGED"] .floor-furniture {
-    border-color: #7d9e85;
-  }
+.dark .floor-plan {
+  --floor: #292d2b;
+  --furniture: #383f38;
+  --floor-text: #f0f1e9;
+  --floor-line: #404740;
 }
+.dark .floor-bar {
+  background: #333a33;
+  border-color: #485045;
+}
+.dark .floor-seat:hover {
+  background: #31382e;
+}
+.dark .floor-seat-selected {
+  background: #364535;
+  border-color: #84957e;
+}
+.dark .floor-chair {
+  background: #535e4e;
+  border-color: #65705e;
+}
+.dark .floor-furniture {
+  border-color: #65705e;
+}
+
 @media (min-width: 1200px) {
   .demo-salon .floor-seat {
     min-height: 112px;

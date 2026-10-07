@@ -6,6 +6,7 @@ import {
   useCallback,
   createContext,
   useContext,
+  useRef,
 } from "react";
 import { ServiceCall } from "@/types";
 import {
@@ -35,18 +36,22 @@ export function useCallsState(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const generation = useRef(0);
   const fetchCalls = useCallback(async () => {
+    const request = ++generation.current;
     try {
       const data = await getActiveCalls(restaurantId);
+      if (request !== generation.current) return;
       setCalls(data);
       setError(null);
     } catch (err) {
+      if (request !== generation.current) return;
       console.error("Erro ao buscar chamados:", err);
       setError(
         "Não foi possível atualizar a fila. Verifique a conexão e tente novamente.",
       );
     } finally {
-      setLoading(false);
+      if (request === generation.current) setLoading(false);
     }
   }, [restaurantId]);
 
@@ -63,7 +68,9 @@ export function useCallsState(
       fetchCalls,
     );
 
+    const currentGeneration = generation;
     return () => {
+      currentGeneration.current++;
       unsubscribeStore();
       unsubscribeRealtime();
     };

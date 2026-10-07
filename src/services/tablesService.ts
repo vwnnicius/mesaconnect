@@ -33,12 +33,14 @@ export async function getTables(
   }
 
   // Busca chamados ativos para cruzar dados de tempo
-  const { data: activeCalls } = await supabase
+  const { data: activeCalls, error: callsError } = await supabase
     .from("service_calls")
     .select("id, table_id, requested_at, status")
     .eq("restaurant_id", restaurantId)
     .in("status", ["CALLING", "ACKNOWLEDGED"]);
 
+  if (callsError)
+    throw new Error("Não foi possível sincronizar os chamados das mesas.");
   return (tables as Table[]).map((t) => {
     const active = activeCalls?.find((c) => c.table_id === t.id);
     return {
