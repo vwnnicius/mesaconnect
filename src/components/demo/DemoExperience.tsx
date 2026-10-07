@@ -31,6 +31,7 @@ const chapters = [
   "Atendimento concluído",
   "Cliente avalia",
 ];
+const chapterLabels = ["Mesa", "Chamar", "Assumir", "Concluir", "Avaliar"];
 const descriptions = [
   "Cliente: escolha uma mesa e toque no botão. Verde significa disponível; nada foi solicitado ainda.",
   "O botão envia a solicitação pelo Wi-Fi. Âmbar significa chamando: o garçom vê a mesa, o tempo de espera e a prioridade na fila e na Tela.",
@@ -150,9 +151,7 @@ export function DemoExperience() {
           <div>
             <p className="eyebrow">Do primeiro toque ao último detalhe</p>
             <h1>
-              O salão,
-              <br />
-              <span className="editorial-word">em sintonia.</span>
+              O salão, <span className="editorial-word">em sintonia.</span>
             </h1>
             <p className="demo-description">
               Um cliente chama. A equipe percebe. O atendimento acontece.
@@ -187,41 +186,62 @@ export function DemoExperience() {
           </div>
         </section>
 
-        <details className="demo-guide">
-          <summary>Entenda os papéis e os sinais do salão</summary>
-          <ol>
-            <li>
-              <strong>Cliente:</strong> chama pelo botão e pode avaliar pelo QR,
-              sem login.
-            </li>
-            <li>
-              <strong>Garçom:</strong> assume, atende, registra observações e
-              conclui. Incentive uma opinião sincera, sem pressionar por nota.
-            </li>
-            <li>
-              <strong>Gerente:</strong> cuida da fila, prioridades, acessos de
-              garçons, atividade e relatórios.
-            </li>
-            <li>
-              <strong>Proprietário:</strong> administra sua empresa e cria
-              gerentes.
-            </li>
-            <li>
-              <strong>Administrador geral:</strong> configura empresas e
-              dispositivos ESP32.
-            </li>
-          </ol>
-          <p>
-            Verde: disponível · Âmbar: chamando · Azul: em atendimento ·
-            Vermelho: não incomodar · Cinza: sem sinal. Espera acima de 5
-            minutos recebe aviso de atraso; prioridade é definida pela gestão.
-          </p>
-        </details>
         <div className="demo-notice">
           <span className="demo-notice-dot" />
           Ambiente de demonstração. Mesas, equipe, tempos e avaliações são
           simulados; nada é enviado ao restaurante.
         </div>
+
+        <section className="demo-journey" aria-label="Etapas do percurso">
+          <div className="journey-heading">
+            <div>
+              <p className="eyebrow">O percurso · Mesa {table.number}</p>
+              <h2>{chapters[step]}</h2>
+            </div>
+            <span>
+              0{step + 1} <span>/ 05</span>
+            </span>
+          </div>
+          <div className="journey-progress">
+            {chapters.map((chapter, index) => (
+              <div
+                key={chapter}
+                aria-label={chapter}
+                className={cn(
+                  index <= step && "journey-reached",
+                  index === step && "journey-current",
+                )}
+                aria-current={index === step ? "step" : undefined}
+              >
+                <span>
+                  {index < step ? <Check size={14} aria-hidden /> : index + 1}
+                </span>
+                <p>{chapterLabels[index]}</p>
+              </div>
+            ))}
+          </div>
+          <div className="journey-description">
+            <p aria-live="polite">
+              Mesa {table.number}: {descriptions[step]}
+            </p>
+            {step < 4 ? (
+              <button
+                type="button"
+                className="action-outline"
+                disabled={!table.connected && step === 0}
+                onClick={advance}
+              >
+                Próxima etapa
+                <ArrowRight size={14} />
+              </button>
+            ) : (
+              <button type="button" className="action-outline" onClick={reset}>
+                Experimentar de novo
+                <RotateCcw size={14} />
+              </button>
+            )}
+          </div>
+        </section>
 
         <section
           className="demo-workspace"
@@ -434,54 +454,36 @@ export function DemoExperience() {
           </div>
         </section>
 
-        <section className="demo-journey" aria-label="Etapas do percurso">
-          <div className="journey-heading">
-            <div>
-              <p className="eyebrow">03 / O percurso</p>
-              <h2>{chapters[step]}</h2>
-            </div>
-            <span>
-              0{step + 1} <span>/ 05</span>
-            </span>
-          </div>
-          <div className="journey-progress">
-            {chapters.map((chapter, index) => (
-              <div
-                key={chapter}
-                className={cn(
-                  index <= step && "journey-reached",
-                  index === step && "journey-current",
-                )}
-                aria-current={index === step ? "step" : undefined}
-              >
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <p>{chapter}</p>
-              </div>
-            ))}
-          </div>
-          <div className="journey-description">
-            <p aria-live="polite">
-              Mesa {table.number}: {descriptions[step]}
-            </p>
-            {step < 4 ? (
-              <button
-                type="button"
-                className="action-outline"
-                disabled={!table.connected && step === 0}
-                onClick={advance}
-              >
-                Próxima etapa
-                <ArrowRight size={14} />
-              </button>
-            ) : (
-              <button type="button" className="action-outline" onClick={reset}>
-                Experimentar de novo
-                <RotateCcw size={14} />
-              </button>
-            )}
-          </div>
-        </section>
-
+        <details className="demo-guide">
+          <summary>Entenda os papéis e os sinais do salão</summary>
+          <ol>
+            <li>
+              <strong>Cliente:</strong> chama pelo botão e pode avaliar pelo QR,
+              sem login.
+            </li>
+            <li>
+              <strong>Garçom:</strong> assume, atende, registra observações e
+              conclui. Incentive uma opinião sincera, sem pressionar por nota.
+            </li>
+            <li>
+              <strong>Gerente:</strong> cuida da fila, prioridades, acessos de
+              garçons, atividade e relatórios.
+            </li>
+            <li>
+              <strong>Proprietário:</strong> administra sua empresa e cria
+              gerentes.
+            </li>
+            <li>
+              <strong>Administrador geral:</strong> configura empresas e
+              dispositivos ESP32.
+            </li>
+          </ol>
+          <p>
+            Verde: disponível · Âmbar: chamando · Azul: em atendimento ·
+            Vermelho: não incomodar · Cinza: sem sinal. Espera acima de 5
+            minutos recebe aviso de atraso; prioridade é definida pela gestão.
+          </p>
+        </details>
         <section
           className="demo-journal"
           aria-label="Histórico da demonstração"

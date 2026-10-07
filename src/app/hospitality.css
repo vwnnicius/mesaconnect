@@ -2407,6 +2407,7 @@ h1 {
   }
 }
 
-.dark .editorial-word {
+.dark .editorial-word,
+.dark .demo-intro h1 .editorial-word {
   color: #b7d2c0;
 }

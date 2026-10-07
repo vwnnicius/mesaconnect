@@ -14,6 +14,7 @@ const fraunces = localFont({
 });
 import "./globals.css";
 import "./hospitality.css";
+import "./design-refinements.css";
 
 export const metadata: Metadata = {
   title: "MesaConnect — Atendimento por mesa em tempo real",
@@ -38,6 +39,14 @@ export default function RootLayout({
       className={`${manrope.variable} ${fraunces.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{var p=localStorage.getItem("mesaconnect-theme");document.documentElement.classList.toggle("dark",p?p==="dark":matchMedia("(prefers-color-scheme: dark)").matches)}catch{}',
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
         {children}
       </body>

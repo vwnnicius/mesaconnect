@@ -1,0 +1,289 @@
+/* Adapted from the MesaConnect Lovable visual study, c037594.
+   Keep Next.js fonts, service hooks and tenant data authoritative. */
+:root {
+  --mc-page: #f7f4ee;
+  --mc-green: oklch(0.55 0.07 160);
+  --mc-green-surface: oklch(0.937 0.025 155);
+  --mc-green-chair: oklch(0.88 0.035 155);
+  --mc-amber: oklch(0.56 0.12 73);
+  --mc-amber-surface: oklch(0.955 0.054 85);
+  --mc-amber-chair: oklch(0.88 0.065 85);
+  --mc-blue: oklch(0.54 0.1 245);
+  --mc-blue-surface: oklch(0.934 0.033 245);
+  --mc-blue-chair: oklch(0.87 0.045 245);
+  --mc-red: oklch(0.56 0.12 23);
+  --mc-red-surface: oklch(0.943 0.028 23);
+  --mc-red-chair: oklch(0.882 0.036 23);
+  --mc-gray: oklch(0.56 0.012 250);
+  --mc-gray-surface: oklch(0.936 0.003 250);
+  --mc-gray-chair: oklch(0.866 0.006 250);
+  --mc-floor: oklch(0.984 0.005 85);
+  --mc-floor-line: oklch(0.91 0.008 85);
+  --background: var(--mc-page);
+}
+html.dark {
+  --mc-page: oklch(0.19 0.008 155);
+  --mc-green: oklch(0.74 0.088 160);
+  --mc-green-surface: oklch(0.3 0.035 155);
+  --mc-green-chair: oklch(0.39 0.044 155);
+  --mc-amber: oklch(0.8 0.12 80);
+  --mc-amber-surface: oklch(0.33 0.047 80);
+  --mc-amber-chair: oklch(0.43 0.059 80);
+  --mc-blue: oklch(0.76 0.098 245);
+  --mc-blue-surface: oklch(0.32 0.039 245);
+  --mc-blue-chair: oklch(0.41 0.052 245);
+  --mc-red: oklch(0.75 0.11 23);
+  --mc-red-surface: oklch(0.32 0.042 23);
+  --mc-red-chair: oklch(0.41 0.054 23);
+  --mc-gray: oklch(0.7 0.01 250);
+  --mc-gray-surface: oklch(0.3 0.005 250);
+  --mc-gray-chair: oklch(0.4 0.008 250);
+  --mc-floor: oklch(0.215 0.008 155);
+  --mc-floor-line: oklch(0.285 0.01 155);
+  --background: var(--mc-page);
+}
+.demo-experience,
+.dark .demo-experience {
+  --background: var(--mc-page);
+}
+body {
+  font-size: 14px;
+}
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--mc-green);
+  outline-offset: 4px;
+}
+.salon-seat,
+.wall-table {
+  --mc-status: var(--mc-green);
+  --mc-status-surface: var(--mc-green-surface);
+  --mc-status-chair: var(--mc-green-chair);
+}
+:is(.salon-seat, .wall-table)[data-status="CALLING"] {
+  --mc-status: var(--mc-amber);
+  --mc-status-surface: var(--mc-amber-surface);
+  --mc-status-chair: var(--mc-amber-chair);
+}
+:is(.salon-seat, .wall-table)[data-status="ACKNOWLEDGED"] {
+  --mc-status: var(--mc-blue);
+  --mc-status-surface: var(--mc-blue-surface);
+  --mc-status-chair: var(--mc-blue-chair);
+}
+:is(.salon-seat, .wall-table)[data-status="DO_NOT_DISTURB"] {
+  --mc-status: var(--mc-red);
+  --mc-status-surface: var(--mc-red-surface);
+  --mc-status-chair: var(--mc-red-chair);
+}
+:is(.salon-seat, .wall-table)[data-status="OFFLINE"] {
+  --mc-status: var(--mc-gray);
+  --mc-status-surface: var(--mc-gray-surface);
+  --mc-status-chair: var(--mc-gray-chair);
+}
+.salon-plan .salon-canvas {
+  background: var(--mc-floor);
+  border-color: var(--mc-floor-line);
+  border-radius: 12px;
+}
+.salon-plan .salon-seat[data-status] .salon-furniture {
+  background: var(--mc-status-surface);
+  color: var(--mc-status);
+  border-color: color-mix(in oklab, var(--mc-status) 45%, transparent);
+  box-shadow: 0 2px 3px #14251b08;
+  transition:
+    background-color 220ms,
+    border-color 220ms,
+    color 220ms;
+}
+.salon-plan .salon-seat .salon-furniture i {
+  background: var(--mc-status-chair);
+  border-color: color-mix(in oklab, var(--mc-status) 25%, transparent);
+}
+.salon-plan .salon-seat[data-status] b {
+  background: var(--mc-status);
+}
+.salon-plan .salon-selected {
+  outline-color: var(--mc-green);
+}
+.wall-grid .wall-table[data-status] {
+  border-color: color-mix(in oklab, var(--mc-status) 50%, var(--border));
+  background: var(--mc-status-surface);
+}
+.wall-table h2,
+.wall-table strong {
+  color: var(--mc-status);
+}
+.demo-header {
+  padding-block: 18px;
+}
+.demo-main {
+  padding-top: 32px;
+}
+.demo-intro {
+  padding-bottom: 20px;
+  gap: 24px;
+}
+.demo-intro h1 {
+  font-size: clamp(36px, 4.2vw, 58px);
+  line-height: 1.06;
+  margin-top: 12px;
+}
+.demo-description {
+  font-size: 14px;
+  margin-top: 16px;
+}
+.demo-guide {
+  margin: 0 0 14px;
+  padding-block: 14px;
+}
+.demo-notice {
+  font-size: 12px;
+  padding-block: 12px;
+  border-top: 0;
+}
+.demo-journey {
+  padding: 22px 0;
+}
+.journey-heading h2 {
+  font-size: 22px;
+  margin-top: 5px;
+}
+.journey-progress {
+  max-width: 670px;
+  margin: 20px 0;
+  gap: 12px;
+}
+.journey-progress > div {
+  position: relative;
+  border: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--muted);
+}
+.journey-progress > div:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 68%;
+  width: 73%;
+  height: 1px;
+  background: var(--border);
+}
+.journey-progress > div > span {
+  display: grid;
+  place-items: center;
+  width: 33px;
+  height: 33px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 12px;
+  background: var(--card);
+}
+.journey-progress > .journey-current > span {
+  border-color: var(--mc-green);
+  background: var(--mc-green-surface);
+  color: var(--mc-green);
+}
+.journey-progress > .journey-reached:not(.journey-current) > span {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.journey-progress p {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 7px;
+}
+.journey-description > p {
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 740px;
+}
+.demo-workspace {
+  padding-top: 28px;
+  gap: 28px;
+}
+.demo-action-panel {
+  border-radius: 16px;
+}
+.demo-live-count,
+.demo-map-hint,
+.device-feedback {
+  font-size: 12px;
+}
+.demo-map-hint {
+  line-height: 1.7;
+}
+.demo-reset,
+.demo-controls p,
+.demo-back {
+  font-size: 12px;
+}
+.demo-action-panel h3 {
+  font-size: 14px;
+}
+.call-row > .action-solid,
+.call-row > .action-outline {
+  min-height: 48px;
+  font-size: 14px;
+}
+.surface,
+.call-row {
+  border-radius: 14px;
+}
+@media (max-width: 1040px) {
+  .demo-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .demo-main {
+    padding: 26px 20px 20px;
+  }
+  .demo-intro h1 {
+    font-size: clamp(36px, 10vw, 46px);
+  }
+  .demo-controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .demo-controls .action-solid {
+    font-size: 13px;
+  }
+  .demo-intro {
+    gap: 16px;
+  }
+  .demo-journey {
+    padding-block: 20px;
+  }
+  .journey-progress {
+    gap: 4px;
+  }
+  .journey-progress p {
+    font-size: 11px;
+  }
+  .journey-description {
+    gap: 12px;
+  }
+  .journey-description button {
+    width: 100%;
+  }
+  .demo-workspace {
+    gap: 20px;
+  }
+  .demo-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .demo-action-panel {
+    padding: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .salon-plan .salon-seat[data-status] .salon-furniture {
+    transition: none;
+  }
+}

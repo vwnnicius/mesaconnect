@@ -37,3 +37,13 @@ Teste visual em dois painéis: simulador criou chamado na mesa 02 de Aurora, Tel
 Demo escura corrigida, incluindo planta e dispositivo. Tema por classe, sem conflito com preferência do sistema. Barra lateral pode ser escondida/mostrada e preferência persiste. Responsividade da Tela verificada em 390 px sem transbordamento. 15 logins fictícios redefinidos com senhas genéricas distintas e verificados; lista privada fora do repositório.
 
 Lovable localizado no catálogo, porém não instalado/conectado nesta sessão. Ajustes aplicados no código existente; não foi alegado uso do Lovable.
+# Lovable visual integration — 2026-10-07
+
+The Lovable study (project `2a6699cd-857f-42f8-97dc-c5d33acd8b91`, commit `c037594`) completed. Its semantic light/dark status tokens, floor surfaces, guided circular step rail and restrained motion were adapted to the existing Next.js app. Prototype font sizes were enlarged for operation. No additional GitHub repository or backend was created.
+
+- Lint, TypeScript, production build (21 pages) and all 14 existing tests passed.
+- Browser verified isolated demo call → acknowledgement → completion → 4-star feedback, and restart.
+- Demo checked at 320/390 px without horizontal overflow; editorial dark text resolves to `rgb(183, 210, 192)`.
+- Authenticated Aurora screen reports “Conectado em tempo real”; six live tables and existing do-not-disturb state preserved. Sidebar hide/show verified. No call-service or Realtime hooks changed in this visual integration; the preceding two-panel synchronization test remains applicable.
+- Theme now initializes before paint and synchronizes through storage events across tabs; no new framework or animation dependency.
+- Generic fictional-account credentials scanned against tracked/untracked source: no matches. Credential handouts remain outside Git.

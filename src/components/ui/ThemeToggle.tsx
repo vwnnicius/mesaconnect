@@ -12,8 +12,25 @@ export function ThemeToggle() {
     setDark(value);
     const sync = () =>
       setDark(document.documentElement.classList.contains("dark"));
+    const system = matchMedia("(prefers-color-scheme: dark)");
+    const applyPreference = () => {
+      const saved = localStorage.getItem("mesaconnect-theme");
+      const next = saved ? saved === "dark" : system.matches;
+      document.documentElement.classList.toggle("dark", next);
+      setDark(next);
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "mesaconnect-theme" || event.key === null)
+        applyPreference();
+    };
     window.addEventListener("mesaconnect-theme", sync);
-    return () => window.removeEventListener("mesaconnect-theme", sync);
+    window.addEventListener("storage", onStorage);
+    system.addEventListener("change", applyPreference);
+    return () => {
+      window.removeEventListener("mesaconnect-theme", sync);
+      window.removeEventListener("storage", onStorage);
+      system.removeEventListener("change", applyPreference);
+    };
   }, []);
   return (
     <button
