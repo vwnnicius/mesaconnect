@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Table } from '@/types';
-import { TABLE_STATUS_CONFIG } from '@/lib/constants';
 import { StatusDot } from '@/components/ui/StatusDot';
 import { processDeviceEvent } from '@/services/deviceService';
 import { Button } from '@/components/ui/Button';
@@ -22,7 +21,6 @@ export function SimulatorTableCard({
   const [lastMessage, setLastMessage] = useState<string | null>(null);
 
   const deviceUid = `MESA-${table.number.padStart(3, '0')}-ESP32`;
-  const config = TABLE_STATUS_CONFIG[table.status] || TABLE_STATUS_CONFIG.AVAILABLE;
 
   const handleAction = async (eventType: 'CALL' | 'DO_NOT_DISTURB' | 'RESET') => {
     setLoadingAction(eventType);
@@ -50,12 +48,10 @@ export function SimulatorTableCard({
   return (
     <div
       className={cn(
-        'rounded-box border p-4 shadow-card',
-        config.bgColor,
-        config.borderColor
+        'rounded-box border border-border bg-card p-5 shadow-card'
       )}
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
         <div>
           <p className="font-mono text-[10px] text-stone-500">{deviceUid}</p>
           <h3 className="text-xl font-semibold mt-0.5">Mesa {table.number}</h3>
@@ -63,13 +59,12 @@ export function SimulatorTableCard({
         <StatusDot status={table.status} size="md" />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2">
         <Button
           size="sm"
           variant="accent"
           onClick={() => handleAction('CALL')}
           disabled={loadingAction !== null}
-          className="col-span-2"
         >
           <BellRing className="w-4 h-4" />
           {loadingAction === 'CALL' ? 'Enviando…' : 'Chamar garçom'}
@@ -96,7 +91,7 @@ export function SimulatorTableCard({
       </div>
 
       {lastMessage ? (
-        <p className="mt-3 text-[11px] font-mono text-stone-600 dark:text-stone-400 truncate">
+        <p role="status" className="mt-3 text-xs leading-relaxed text-muted-foreground break-words">
           {lastMessage}
         </p>
       ) : null}

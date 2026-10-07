@@ -6,16 +6,18 @@ import { QrCode, Cpu, Bell } from 'lucide-react';
 import { RESTAURANT_DEMO } from '@/lib/constants';
 import { useCalls } from '@/hooks/useCalls';
 import { BrandMark } from '@/components/layout/BrandMark';
+import { isSupabaseConfigured } from '@/lib/supabase/client';
 
 export function Header() {
   const { calls } = useCalls();
   const callingCount = calls.filter((c) => c.status === 'CALLING').length;
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-4 md:px-7 bg-cream/85 dark:bg-[#161210]/85 backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-20 flex items-center justify-between h-[76px] px-5 md:px-10 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="flex items-center gap-2 md:hidden">
         <BrandMark className="w-7 h-7" />
         <span className="font-semibold text-sm">MesaConnect</span>
+        {!isSupabaseConfigured() ? <span className="text-[10px] text-muted-foreground border border-border px-1.5 py-0.5 rounded">Demo</span> : null}
       </div>
 
       <div className="hidden md:flex items-center gap-3 text-xs text-stone-500">
@@ -24,8 +26,7 @@ export function Header() {
         </span>
         <span className="text-border">·</span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-          Salão ao vivo
+          {isSupabaseConfigured() ? 'Operação do salão' : 'Demonstração local'}
         </span>
       </div>
 
@@ -47,7 +48,8 @@ export function Header() {
         </Link>
         <Link
           href="/calls"
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold ${
+          aria-label={`${callingCount} mesas aguardando atendimento`}
+          className={`inline-flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-xl text-xs font-semibold ${
             callingCount > 0
               ? 'bg-accent text-white'
               : 'text-stone-600 hover:bg-white/70 dark:text-stone-300 dark:hover:bg-white/5'

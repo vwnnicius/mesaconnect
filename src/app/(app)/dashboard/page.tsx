@@ -36,8 +36,8 @@ export default function DashboardPage() {
     <div className="space-y-7">
       <PageHeader
         kicker="Hoje no salão"
-        title={`${greeting}, João`}
-        description="Fila de atendimento, mapa das mesas e tempo de resposta da equipe."
+        title="Visão do salão"
+        description={`${greeting}. Acompanhe as mesas e a fila de atendimento.`}
         actions={
           <>
             <Link href="/calls">
@@ -55,7 +55,7 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="metric-strip border-y border-border">
         <StatCard
           title="Chamados em aberto"
           value={openCallsCount}
@@ -86,6 +86,7 @@ export default function DashboardPage() {
           icon={<Star className="w-4 h-4 text-orange-600" />}
         />
       </div>
+      <p className="text-xs text-muted-foreground leading-relaxed">Fila e mapa acompanham a operação. Tempo médio, total do dia, notas e gráficos abaixo usam dados de demonstração.</p>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2">
@@ -113,10 +114,10 @@ export default function DashboardPage() {
               {calls.slice(0, 4).map((call) => (
                 <div
                   key={call.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-cream/60 dark:bg-black/20"
+                  className="flex items-center justify-between py-4 border-b border-border last:border-0"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-espresso text-cream flex items-center justify-center text-sm font-semibold tabular-nums">
+                    <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center text-sm font-semibold tabular-nums">
                       {call.table_number}
                     </div>
                     <div>
@@ -191,19 +192,19 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle>Volume por horário</CardTitle>
           </CardHeader>
-          <div className="h-40 flex items-end gap-2.5 px-1">
+          <div className="h-40 flex items-end gap-1.5 sm:gap-2.5 px-1">
             {DEMO_HOURLY_CALLS.map((item) => {
               const max = Math.max(...DEMO_HOURLY_CALLS.map((h) => h.calls));
               const heightPercent = Math.round((item.calls / max) * 100);
               return (
-                <div key={item.hour} className="flex-1 flex flex-col items-center gap-1.5">
+                <div key={item.hour} className="min-w-0 flex-1 flex flex-col items-center gap-1.5">
                   <span className="text-[10px] font-mono tabular-nums text-stone-500">
                     {item.calls}
                   </span>
                   <div className="w-full bg-cream dark:bg-stone-800 rounded-t h-28 flex items-end">
                     <div
                       style={{ height: `${heightPercent}%` }}
-                      className="w-full bg-espresso dark:bg-cream rounded-t"
+                      className="w-full bg-espresso dark:bg-stone-300 rounded-t"
                     />
                   </div>
                   <span className="text-[10px] font-mono text-stone-400">{item.hour}</span>
@@ -218,8 +219,8 @@ export default function DashboardPage() {
             <CardTitle>Mesas com mais chamados</CardTitle>
           </CardHeader>
           <div className="space-y-3">
-            {DEMO_CALLS_BY_TABLE.slice(0, 5).map((t, idx) => {
-              const max = DEMO_CALLS_BY_TABLE[0].calls;
+            {[...DEMO_CALLS_BY_TABLE].sort((a, b) => b.calls - a.calls).slice(0, 5).map((t, idx) => {
+              const max = Math.max(1, ...DEMO_CALLS_BY_TABLE.map((item) => item.calls));
               const pct = Math.round((t.calls / max) * 100);
               return (
                 <div key={t.tableNumber} className="space-y-1">
@@ -230,7 +231,7 @@ export default function DashboardPage() {
                   <div className="w-full h-1.5 bg-cream dark:bg-stone-800 rounded-full overflow-hidden">
                     <div
                       style={{ width: `${pct}%` }}
-                      className={`h-full rounded-full ${idx === 0 ? 'bg-accent' : 'bg-espresso dark:bg-cream'}`}
+                      className={`h-full rounded-full ${idx === 0 ? 'bg-accent' : 'bg-espresso dark:bg-stone-300'}`}
                     />
                   </div>
                 </div>

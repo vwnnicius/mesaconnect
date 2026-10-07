@@ -1,5 +1,4 @@
 import React from 'react';
-import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
 
 interface StatCardProps {
@@ -16,35 +15,30 @@ export function StatCard({
   title,
   value,
   subtitle,
-  icon,
   trend,
   trendPositive,
   highlight,
 }: StatCardProps) {
   return (
-    <Card
+    <div
       className={cn(
-        highlight && 'border-orange-300/80 bg-orange-50/40 dark:border-orange-800 dark:bg-orange-950/20'
+        'py-5 px-5 md:py-6 md:px-6',
+        highlight && 'text-accent'
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-medium text-stone-500 uppercase tracking-[0.08em]">
+          <p className="text-xs font-medium text-muted-foreground">
             {title}
           </p>
-          <p className="mt-2 text-[1.75rem] font-semibold tabular-nums tracking-tight text-stone-900 dark:text-stone-50 leading-none">
+          <p className="mt-3 text-[2rem] md:text-[2.5rem] font-semibold tabular-nums tracking-[-0.045em] leading-none">
             {value}
           </p>
         </div>
-        {icon ? (
-          <div className="p-2 rounded-lg bg-cream dark:bg-stone-800 text-stone-600 dark:text-stone-300">
-            {icon}
-          </div>
-        ) : null}
       </div>
 
       {(subtitle || trend) && (
-        <div className="mt-3 flex items-center gap-2 text-xs">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs leading-relaxed">
           {trend ? (
             <span
               className={cn(
@@ -60,6 +54,6 @@ export function StatCard({
           {subtitle ? <span className="text-stone-500">{subtitle}</span> : null}
         </div>
       )}
-    </Card>
+    </div>
   );
 }

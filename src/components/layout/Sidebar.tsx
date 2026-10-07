@@ -17,6 +17,9 @@ import { cn } from '@/lib/utils';
 import { useCalls } from '@/hooks/useCalls';
 import { RESTAURANT_DEMO } from '@/lib/constants';
 import { BrandMark } from '@/components/layout/BrandMark';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const navItems = [
   { name: 'Painel', href: '/dashboard', icon: LayoutDashboard },
@@ -29,21 +32,42 @@ const navItems = [
 ];
 
 export function Sidebar() {
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(false);
   const pathname = usePathname();
   const { calls } = useCalls();
   const pendingCallsCount = calls.filter((c) => c.status === 'CALLING').length;
 
+  const signOut = async () => {
+    setSigningOut(true);
+    setSignOutError(false);
+    try {
+      if (isSupabaseConfigured()) {
+        const { error } = await createClient().auth.signOut();
+        if (error) throw error;
+      }
+      router.replace('/login');
+      router.refresh();
+    } catch {
+      setSignOutError(true);
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
   return (
-    <aside className="hidden md:flex md:w-[260px] md:flex-col fixed inset-y-0 z-30 bg-espresso text-cream">
-      <div className="flex items-center gap-3 px-5 h-[64px] border-b border-white/10">
+    <aside className="hidden md:flex md:w-[232px] md:flex-col fixed inset-y-0 z-30 bg-card border-r border-border text-foreground">
+      <div className="flex items-center gap-3 px-5 h-[76px]">
         <BrandMark className="w-8 h-8" />
         <div className="min-w-0">
           <p className="font-semibold text-[15px] tracking-tight leading-none">MesaConnect</p>
-          <p className="text-[11px] text-stone-400 truncate mt-1">{RESTAURANT_DEMO.name}</p>
+          <p className="text-[11px] text-muted-foreground truncate mt-1">Atendimento por mesa</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav aria-label="Navegação principal" className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+        <p className="px-3 mb-3 text-[11px] text-muted-foreground font-medium">Restaurante</p>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -52,15 +76,16 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'group flex items-center justify-between px-3 py-2 text-[13px] rounded-lg transition-colors',
+                'group flex items-center justify-between px-3 py-2.5 text-[13px] rounded-lg transition-colors',
                 isActive
-                  ? 'bg-white/10 text-white'
-                  : 'text-stone-400 hover:text-cream hover:bg-white/5'
+                  ? 'bg-background text-foreground font-semibold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background'
               )}
             >
               <span className="flex items-center gap-2.5">
-                <Icon className={cn('w-4 h-4', isActive ? 'text-orange-300' : 'text-stone-500')} />
+                <Icon aria-hidden className={cn('w-4 h-4', isActive ? 'text-accent' : 'text-muted-foreground')} strokeWidth={1.7} />
                 {item.name}
               </span>
 
@@ -79,25 +104,29 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 border-t border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">
-              JG
+            <div className="w-8 h-8 rounded-full bg-background border border-border flex items-center justify-center text-[11px] font-semibold">
+              MC
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-medium truncate">João Silva</p>
-              <p className="text-[11px] text-stone-500">Garçom · turno jantar</p>
+              <p className="text-xs font-medium truncate">Equipe do salão</p>
+              <p className="text-[11px] text-muted-foreground truncate">{RESTAURANT_DEMO.name}</p>
             </div>
           </div>
-          <Link
-            href="/login"
+          <button
+            type="button"
+            onClick={signOut}
+            disabled={signingOut}
+            aria-label="Sair da conta"
             title="Sair"
-            className="p-1.5 rounded-md text-stone-500 hover:text-cream hover:bg-white/10"
+            className="p-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background disabled:opacity-50"
           >
             <LogOut className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
+        {signOutError ? <p role="alert" className="text-xs text-red-600 mt-2">Não foi possível sair. Tente novamente.</p> : null}
       </div>
     </aside>
   );

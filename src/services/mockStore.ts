@@ -47,9 +47,11 @@ class InMemoryStore {
   }
 
   createCall(tableId: string, restaurantId: string): ServiceCall {
+    const existing = this.calls.find((c) => c.table_id === tableId && (c.status === 'CALLING' || c.status === 'ACKNOWLEDGED'));
+    if (existing) return existing;
     const table = this.tables.find((t) => t.id === tableId);
     const newCall: ServiceCall = {
-      id: `call-${Date.now()}`,
+      id: crypto.randomUUID(),
       restaurant_id: restaurantId,
       table_id: tableId,
       table_number: table?.number || '??',
@@ -75,7 +77,7 @@ class InMemoryStore {
 
   acknowledgeCall(callId: string, staffName = 'Garçom'): ServiceCall | undefined {
     const call = this.calls.find((c) => c.id === callId);
-    if (call) {
+    if (call?.status === 'CALLING') {
       call.status = 'ACKNOWLEDGED';
       call.acknowledged_at = new Date().toISOString();
       call.acknowledged_by = staffName;
@@ -84,13 +86,14 @@ class InMemoryStore {
         table.status = 'ACKNOWLEDGED';
       }
       this.notify();
+      return call;
     }
-    return call;
+    return undefined;
   }
 
   completeCall(callId: string, staffName = 'Garçom'): ServiceCall | undefined {
     const call = this.calls.find((c) => c.id === callId);
-    if (call) {
+    if (call?.status === 'ACKNOWLEDGED') {
       call.status = 'COMPLETED';
       call.completed_at = new Date().toISOString();
       call.completed_by = staffName;
@@ -101,8 +104,9 @@ class InMemoryStore {
         table.active_call_requested_at = null;
       }
       this.notify();
+      return call;
     }
-    return call;
+    return undefined;
   }
 
   addEvaluation(evaluation: Omit<Evaluation, 'id' | 'created_at'>): Evaluation {

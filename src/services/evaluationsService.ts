@@ -12,6 +12,9 @@ export async function createEvaluation(params: {
   tableNumber?: string;
 }): Promise<Evaluation | null> {
   const restaurantId = params.restaurantId || RESTAURANT_DEMO.id;
+  if (!Number.isInteger(params.rating) || params.rating < 1 || params.rating > 5) {
+    throw new Error('Escolha uma nota de 1 a 5.');
+  }
 
   if (!isSupabaseConfigured()) {
     return inMemoryStore.addEvaluation({
@@ -37,25 +40,8 @@ export async function createEvaluation(params: {
     .single();
 
   if (error || !data) {
-    console.warn('Erro ao salvar avaliação no Supabase, usando store local:', error?.message);
-    return inMemoryStore.addEvaluation({
-      restaurant_id: restaurantId,
-      table_id: params.tableId,
-      service_call_id: params.serviceCallId || null,
-      rating: params.rating,
-      comment: params.comment || null,
-      table_number: params.tableNumber || '??',
-    });
+    throw new Error(error?.message || 'Não foi possível enviar a avaliação.');
   }
-
-  inMemoryStore.addEvaluation({
-    restaurant_id: restaurantId,
-    table_id: params.tableId,
-    service_call_id: params.serviceCallId || null,
-    rating: params.rating,
-    comment: params.comment || null,
-    table_number: params.tableNumber || '??',
-  });
 
   return data as Evaluation;
 }

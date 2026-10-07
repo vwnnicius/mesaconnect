@@ -32,9 +32,9 @@ export async function processDeviceEvent(
   // 2. Se Supabase não configurado ou em modo demo, resolve via mockStore
   if (!isSupabaseConfigured()) {
     const tables = inMemoryStore.getTables();
-    const match = device_uid.match(/MESA-(\d+)/i);
-    const tableNum = match ? match[1].padStart(2, '0') : '01';
-    const table = tables.find((t) => t.number.padStart(2, '0') === tableNum) || tables[0];
+    const match = device_uid.match(/^MESA-(\d+)-ESP32$/i);
+    const tableNum = match ? String(Number(match[1])).padStart(2, '0') : null;
+    const table = tables.find((t) => t.number.padStart(2, '0') === tableNum);
 
     if (!table) {
       return { success: false, message: `Dispositivo ${device_uid} não encontrado na base de demonstração` };

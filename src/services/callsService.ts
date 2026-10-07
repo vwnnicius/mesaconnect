@@ -30,17 +30,13 @@ export async function createServiceCall(params: {
     .single();
 
   if (error || !data) {
-    console.warn('Erro ao inserir chamado no Supabase, usando fallback local:', error?.message);
-    return inMemoryStore.createCall(params.tableId, restaurantId);
+    throw new Error(error?.message || 'Não foi possível registrar o chamado.');
   }
 
   // Atualiza mesa no Supabase (se trigger não estiver ativo)
   await (supabase.from('tables') as any)
     .update({ status: 'CALLING' })
     .eq('id', params.tableId);
-
-  // Também replica no store local para sincronia imediata
-  inMemoryStore.createCall(params.tableId, restaurantId);
 
   return data as ServiceCall;
 }
@@ -52,24 +48,24 @@ export async function acknowledgeServiceCall(
   const now = new Date().toISOString();
 
   if (!isSupabaseConfigured()) {
-    inMemoryStore.acknowledgeCall(callId, staffUserId || 'Garçom');
-    return true;
+    return !!inMemoryStore.acknowledgeCall(callId, staffUserId || 'Garçom');
   }
 
   const supabase = createClient();
+  const { data: auth } = await supabase.auth.getUser();
   const { data: call, error } = await (supabase.from('service_calls') as any)
     .update({
       status: 'ACKNOWLEDGED',
       acknowledged_at: now,
-      acknowledged_by: staffUserId || null,
+      acknowledged_by: auth.user?.id || staffUserId || null,
     })
     .eq('id', callId)
+    .eq('status', 'CALLING')
     .select('table_id')
     .single();
 
   if (error) {
     console.error('Erro ao assumir chamado no Supabase:', error);
-    inMemoryStore.acknowledgeCall(callId);
     return false;
   }
 
@@ -79,7 +75,6 @@ export async function acknowledgeServiceCall(
       .eq('id', call.table_id);
   }
 
-  inMemoryStore.acknowledgeCall(callId);
   return true;
 }
 
@@ -90,24 +85,24 @@ export async function completeServiceCall(
   const now = new Date().toISOString();
 
   if (!isSupabaseConfigured()) {
-    inMemoryStore.completeCall(callId, staffUserId || 'Garçom');
-    return true;
+    return !!inMemoryStore.completeCall(callId, staffUserId || 'Garçom');
   }
 
   const supabase = createClient();
+  const { data: auth } = await supabase.auth.getUser();
   const { data: call, error } = await (supabase.from('service_calls') as any)
     .update({
       status: 'COMPLETED',
       completed_at: now,
-      completed_by: staffUserId || null,
+      completed_by: auth.user?.id || staffUserId || null,
     })
     .eq('id', callId)
+    .eq('status', 'ACKNOWLEDGED')
     .select('table_id')
     .single();
 
   if (error) {
     console.error('Erro ao concluir chamado no Supabase:', error);
-    inMemoryStore.completeCall(callId);
     return false;
   }
 
@@ -117,7 +112,6 @@ export async function completeServiceCall(
       .eq('id', call.table_id);
   }
 
-  inMemoryStore.completeCall(callId);
   return true;
 }
 
@@ -145,14 +139,7 @@ export async function getActiveCalls(
     .order('requested_at', { ascending: true }); // Mais antigo primeiro
 
   if (error || !data) {
-    console.warn('Erro ao buscar chamados no Supabase, usando store local:', error?.message);
-    return inMemoryStore
-      .getCalls()
-      .filter((c) => c.status === 'CALLING' || c.status === 'ACKNOWLEDGED')
-      .sort(
-        (a, b) =>
-          new Date(a.requested_at).getTime() - new Date(b.requested_at).getTime()
-      );
+    throw new Error(error?.message || 'Não foi possível carregar os chamados.');
   }
 
   return data.map((item: any) => ({

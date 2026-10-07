@@ -33,10 +33,10 @@ export default function TablesPage() {
       <PageHeader
         kicker="Salão"
         title="Mapa de mesas"
-        description="Status ao vivo de cada mesa e do botão físico."
+        description="Veja quais mesas precisam da atenção da equipe."
         actions={
           <>
-            <Button size="sm" variant="outline" onClick={() => refresh()} title="Atualizar">
+            <Button size="sm" variant="outline" onClick={() => refresh()} title="Atualizar" aria-label="Atualizar mesas">
               <RotateCw className="w-4 h-4" />
             </Button>
             <Link href="/simulator">
@@ -48,13 +48,14 @@ export default function TablesPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar mesas">
         <button
           onClick={() => setFilter('ALL')}
-          className={`px-2.5 py-1.5 rounded-md text-xs font-medium border ${
+          aria-pressed={filter === 'ALL'}
+          className={`min-h-11 px-3 py-2 rounded-lg text-xs font-medium border ${
             filter === 'ALL'
-              ? 'bg-espresso text-cream border-transparent dark:bg-cream dark:text-espresso'
-              : 'bg-cream-paper text-stone-600 border-border hover:border-stone-400'
+              ? 'bg-espresso text-white border-transparent dark:bg-stone-100 dark:text-espresso'
+              : 'bg-card text-muted-foreground border-border hover:border-stone-400'
           }`}
         >
           Todas ({tables.length})
@@ -68,10 +69,11 @@ export default function TablesPage() {
               <button
                 key={statusKey}
                 onClick={() => setFilter(statusKey)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border ${
+                aria-pressed={isSelected}
+                className={`inline-flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg text-xs font-medium border ${
                   isSelected
                     ? `${cfg.bgColor} ${cfg.textColor} ${cfg.borderColor}`
-                    : 'bg-cream-paper text-stone-600 border-border hover:border-stone-400'
+                    : 'bg-card text-muted-foreground border-border hover:border-stone-400'
                 }`}
               >
                 {cfg.label}

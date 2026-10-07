@@ -14,7 +14,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'bg-cream-paper dark:bg-[#221c18] border border-border rounded-box p-5 shadow-card',
+        'bg-card border border-border rounded-box p-5 md:p-6 shadow-card',
         hoverEffect && 'transition-colors hover:border-stone-400/70 dark:hover:border-stone-600',
         className
       )}
@@ -33,7 +33,7 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'flex items-center justify-between pb-3 mb-3 border-b border-border/80',
+        'flex items-center justify-between pb-3 mb-3 border-b border-border',
         className
       )}
       {...props}

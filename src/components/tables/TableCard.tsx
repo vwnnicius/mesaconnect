@@ -21,18 +21,17 @@ export function TableCard({ table }: TableCardProps) {
   return (
     <div
       className={cn(
-        'relative rounded-box border p-4 flex flex-col justify-between shadow-card min-h-[132px]',
-        config.bgColor,
-        config.borderColor
+        'relative rounded-box border p-5 flex flex-col justify-between bg-card border-border min-h-[168px]',
+        table.status === 'CALLING' && 'border-amber-300 dark:border-amber-800'
       )}
     >
       <div>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <span className="text-[11px] font-medium text-stone-500">Mesa</span>
           <StatusDot status={table.status} size="sm" />
         </div>
         <div className="flex items-baseline justify-between">
-          <h3 className="text-2xl font-semibold tabular-nums tracking-tight text-stone-900 dark:text-stone-100">
+          <h3 className="text-4xl font-medium tabular-nums tracking-[-0.04em] text-foreground">
             {table.number}
           </h3>
           {hasActiveCall ? (
@@ -49,7 +48,8 @@ export function TableCard({ table }: TableCardProps) {
           href={`/evaluate/${RESTAURANT_DEMO.slug}/${table.number}`}
           target="_blank"
           title="Página de avaliação desta mesa"
-          className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10 text-stone-600 dark:text-stone-400"
+          aria-label={`Abrir avaliação da mesa ${table.number}`}
+          className="p-3 -mr-2 rounded-lg hover:bg-background text-muted-foreground"
         >
           <QrCode className="w-4 h-4" />
         </Link>

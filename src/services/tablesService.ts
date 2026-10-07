@@ -71,6 +71,7 @@ export async function getTableByNumber(
   tableNumber: string
 ): Promise<Table | null> {
   if (!isSupabaseConfigured()) {
+    if (restaurantSlug !== RESTAURANT_DEMO.slug) return null;
     const tables = inMemoryStore.getTables();
     return tables.find((t) => t.number.padStart(2, '0') === tableNumber.padStart(2, '0')) || null;
   }
@@ -82,8 +83,7 @@ export async function getTableByNumber(
     .single();
 
   if (!restaurant) {
-    const tables = inMemoryStore.getTables();
-    return tables.find((t) => t.number.padStart(2, '0') === tableNumber.padStart(2, '0')) || null;
+    return null;
   }
 
   const { data: table, error } = await (supabase.from('tables') as any)
@@ -93,8 +93,7 @@ export async function getTableByNumber(
     .single();
 
   if (error || !table) {
-    const tables = inMemoryStore.getTables();
-    return tables.find((t) => t.number.padStart(2, '0') === tableNumber.padStart(2, '0')) || null;
+    return null;
   }
 
   return table as Table;

@@ -1,19 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ServiceCall } from '@/types';
 import { useElapsedTime } from '@/hooks/useElapsedTime';
 import { Button } from '@/components/ui/Button';
-import { CheckCircle2, UserCheck, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CallCardProps {
   call: ServiceCall;
-  onAcknowledge: (id: string) => void;
-  onComplete: (id: string) => void;
+  onAcknowledge: (id: string) => Promise<void>;
+  onComplete: (id: string) => Promise<void>;
 }
 
 export function CallCard({ call, onAcknowledge, onComplete }: CallCardProps) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const isCalling = call.status === 'CALLING';
   const isAcknowledged = call.status === 'ACKNOWLEDGED';
 
@@ -21,21 +22,33 @@ export function CallCard({ call, onAcknowledge, onComplete }: CallCardProps) {
     isCalling ? call.requested_at : call.acknowledged_at || call.requested_at
   );
 
+  const handleAction = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await (isCalling ? onAcknowledge(call.id) : onComplete(call.id));
+    } catch {
+      setError('Não foi possível salvar. Atualize a fila e tente novamente.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-box border p-5 shadow-card',
-        isCalling && !isUrgent && 'bg-orange-50/80 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800',
-        isCalling && isUrgent && 'bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800',
-        isAcknowledged && 'bg-blue-50/70 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
+        'relative rounded-box border border-border bg-card p-5 sm:p-6 shadow-card',
+        isCalling && isUrgent && 'border-red-200 dark:border-red-900',
+        isAcknowledged && 'border-border'
       )}
     >
-      <div className="flex items-start justify-between mb-4 gap-3">
+      <div className="flex items-start justify-between mb-5 gap-3">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-stone-500">
-            Salão principal
+          <p className="text-xs font-medium text-muted-foreground">
+            {isCalling ? 'Aguardando atendimento' : 'Em atendimento'}
           </p>
-          <h2 className="text-[1.75rem] font-semibold tracking-tight text-stone-900 dark:text-stone-50 leading-tight mt-0.5">
+          <h2 className="text-[2rem] font-semibold tracking-[-0.045em] text-foreground leading-tight mt-2">
             Mesa {call.table_number || '—'}
           </h2>
         </div>
@@ -43,39 +56,39 @@ export function CallCard({ call, onAcknowledge, onComplete }: CallCardProps) {
         <div className="text-right">
           <div
             className={cn(
-              'inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold',
-              isCalling && !isUrgent && 'bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100',
-              isCalling && isUrgent && 'bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100',
-              isAcknowledged && 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'
+              'inline-flex items-center gap-1.5 text-xs font-medium',
+              isCalling && !isUrgent && 'text-amber-700 dark:text-amber-400',
+              isCalling && isUrgent && 'text-red-700 dark:text-red-400',
+              isAcknowledged && 'text-blue-700 dark:text-blue-400'
             )}
           >
-            {isCalling && isUrgent ? <AlertTriangle className="w-3.5 h-3.5" /> : null}
-            {isCalling ? 'Aguardando' : 'Em atendimento'}
+            {isCalling ? (isUrgent ? 'Espera prolongada' : 'Solicitado há') : 'Atendendo há'}
           </div>
-          <p className="mt-1.5 font-mono text-sm tabular-nums text-stone-700 dark:text-stone-300">
-            {isCalling ? `há ${elapsed}` : `há ${elapsed}`}
+          <p className="mt-2 text-[1.75rem] font-medium tracking-tight tabular-nums text-foreground">
+            {elapsed}
           </p>
         </div>
       </div>
 
-      <div className="pt-3 border-t border-black/5 dark:border-white/10">
+      <div>
         {isCalling ? (
           <Button
             size="lg"
             fullWidth
             variant="accent"
-            onClick={() => onAcknowledge(call.id)}
+            onClick={handleAction}
+            disabled={busy}
+            aria-label={`Atender mesa ${call.table_number || ''}`}
           >
-            <UserCheck className="w-5 h-5" />
-            Atender mesa
+            {busy ? 'Salvando…' : 'Atender mesa'}
           </Button>
         ) : (
-          <Button size="lg" fullWidth variant="success" onClick={() => onComplete(call.id)}>
-            <CheckCircle2 className="w-5 h-5" />
-            Concluir
+          <Button size="lg" fullWidth variant="primary" onClick={handleAction} disabled={busy} aria-label={`Concluir atendimento da mesa ${call.table_number || ''}`}>
+            {busy ? 'Salvando…' : 'Concluir atendimento'}
           </Button>
         )}
       </div>
+      {error ? <p role="alert" className="text-xs text-red-700 dark:text-red-400 mt-3">{error}</p> : null}
     </div>
   );
 }

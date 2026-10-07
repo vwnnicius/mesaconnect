@@ -21,12 +21,13 @@ export default function AnalyticsPage() {
         description="Tempo até o garçom assumir, duração na mesa e volume por horário."
         actions={
           <span className="text-xs font-medium px-2.5 py-1 rounded-md border border-border bg-cream-paper">
-            Hoje
+            Exemplo demonstrativo · hoje
           </span>
         }
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <p className="text-xs text-muted-foreground leading-relaxed">Estas métricas são exemplos de apresentação. Ainda não representam o histórico do restaurante.</p>
+      <div className="metric-strip border-y border-border">
         <StatCard
           title="Total de chamados"
           value={DEMO_DASHBOARD_METRICS.totalCallsToday}
@@ -55,7 +56,7 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 border-b border-border sm:divide-x divide-border">
         <StatCard
           title="Nota média"
           value={DEMO_DASHBOARD_METRICS.avgRating}
@@ -84,19 +85,19 @@ export default function AnalyticsPage() {
           <CardHeader>
             <CardTitle>Chamados por hora</CardTitle>
           </CardHeader>
-          <div className="h-44 flex items-end gap-2.5 px-1">
+          <div className="h-44 flex items-end gap-1.5 sm:gap-2.5 px-1">
             {DEMO_HOURLY_CALLS.map((item) => {
               const max = Math.max(...DEMO_HOURLY_CALLS.map((h) => h.calls));
               const heightPercent = Math.round((item.calls / max) * 100);
               return (
-                <div key={item.hour} className="flex-1 flex flex-col items-center gap-1.5">
+                <div key={item.hour} className="min-w-0 flex-1 flex flex-col items-center gap-1.5">
                   <span className="text-[10px] font-mono tabular-nums text-stone-500">
                     {item.calls}
                   </span>
                   <div className="w-full bg-cream dark:bg-stone-800 rounded-t h-32 flex items-end">
                     <div
                       style={{ height: `${heightPercent}%` }}
-                      className="w-full bg-espresso dark:bg-cream rounded-t"
+                      className="w-full bg-espresso dark:bg-stone-300 rounded-t"
                     />
                   </div>
                   <span className="text-[10px] font-mono text-stone-400">{item.hour}</span>
@@ -112,8 +113,8 @@ export default function AnalyticsPage() {
             <CardTitle>Volume por mesa</CardTitle>
           </CardHeader>
           <div className="space-y-3">
-            {DEMO_CALLS_BY_TABLE.map((t, idx) => {
-              const max = DEMO_CALLS_BY_TABLE[0].calls;
+            {[...DEMO_CALLS_BY_TABLE].sort((a, b) => b.calls - a.calls).map((t, idx) => {
+              const max = Math.max(1, ...DEMO_CALLS_BY_TABLE.map((item) => item.calls));
               const pct = Math.round((t.calls / max) * 100);
               return (
                 <div key={t.tableNumber} className="space-y-1">
@@ -124,7 +125,7 @@ export default function AnalyticsPage() {
                   <div className="w-full h-1.5 bg-cream dark:bg-stone-800 rounded-full overflow-hidden">
                     <div
                       style={{ width: `${pct}%` }}
-                      className={`h-full rounded-full ${idx === 0 ? 'bg-accent' : 'bg-espresso dark:bg-cream'}`}
+                      className={`h-full rounded-full ${idx === 0 ? 'bg-accent' : 'bg-espresso dark:bg-stone-300'}`}
                     />
                   </div>
                 </div>

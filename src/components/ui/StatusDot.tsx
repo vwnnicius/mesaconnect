@@ -27,14 +27,6 @@ export function StatusDot({
   return (
     <span className={cn('inline-flex items-center gap-2 font-medium text-xs', className)}>
       <span className="relative flex items-center justify-center">
-        {status === 'CALLING' && (
-          <span
-            className={cn(
-              'absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping',
-              config.dotColor
-            )}
-          />
-        )}
         <span
           className={cn(
             'relative inline-block rounded-full',

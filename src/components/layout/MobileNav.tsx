@@ -3,24 +3,32 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BellRing, Grid3X3, Cpu } from 'lucide-react';
+import { LayoutDashboard, BellRing, Grid3X3, Menu } from 'lucide-react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useCalls } from '@/hooks/useCalls';
 
 export function MobileNav() {
   const pathname = usePathname();
+  const [moreOpen, setMoreOpen] = useState(false);
   const { calls } = useCalls();
   const callingCount = calls.filter((c) => c.status === 'CALLING').length;
 
   const items = [
     { name: 'Chamados', href: '/calls', icon: BellRing, badge: callingCount },
     { name: 'Salão', href: '/tables', icon: Grid3X3 },
-    { name: 'Simulador', href: '/simulator', icon: Cpu },
     { name: 'Painel', href: '/dashboard', icon: LayoutDashboard },
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-cream-paper/95 dark:bg-[#221c18]/95 backdrop-blur-md border-t border-border pb-safe">
+    <nav aria-label="Navegação no celular" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur-md border-t border-border pb-safe">
+      {moreOpen ? (
+        <div className="border-b border-border p-3 grid grid-cols-2 gap-2" aria-label="Mais páginas">
+          {[['Desempenho', '/analytics'], ['Avaliações', '/evaluations'], ['Simulador', '/simulator'], ['Configurações', '/settings'], ['Login', '/login']].map(([name, href]) => (
+            <Link key={href} href={href} onClick={() => setMoreOpen(false)} className="rounded-lg px-4 py-3 text-sm hover:bg-background" aria-current={pathname === href ? 'page' : undefined}>{name}</Link>
+          ))}
+        </div>
+      ) : null}
       <div className="grid grid-cols-4 h-16">
         {items.map((item) => {
           const isActive = pathname === item.href;
@@ -30,9 +38,11 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setMoreOpen(false)}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'relative flex flex-col items-center justify-center gap-0.5 select-none',
-                isActive ? 'text-espresso dark:text-cream' : 'text-stone-400'
+                isActive ? 'text-accent' : 'text-muted-foreground'
               )}
             >
               <div className="relative">
@@ -47,6 +57,10 @@ export function MobileNav() {
             </Link>
           );
         })}
+        <button type="button" aria-expanded={moreOpen} onClick={() => setMoreOpen(!moreOpen)} className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground">
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px] font-medium">Mais</span>
+        </button>
       </div>
     </nav>
   );

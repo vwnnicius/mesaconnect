@@ -46,12 +46,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-cream dark:bg-[#161210]">
-      <div className="hidden lg:flex flex-col justify-between p-10 bg-espresso text-cream relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.07] grain"
-          aria-hidden
-        />
+    <div className="min-h-screen grid lg:grid-cols-2 bg-cream dark:bg-background">
+      <div className="hidden lg:flex flex-col justify-between p-14 bg-espresso text-white relative overflow-hidden">
         <div className="relative">
           <div className="flex items-center gap-3">
             <BrandMark className="w-9 h-9" />
@@ -59,15 +55,14 @@ export default function LoginPage() {
           </div>
         </div>
         <div className="relative max-w-md">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-orange-300/90 mb-3">
+          <p className="text-xs text-stone-400 mb-5">
             Operação de salão
           </p>
-          <h1 className="text-4xl font-semibold tracking-tight leading-[1.15]">
-            O botão da mesa chega no painel antes do gesto.
+          <h1 className="text-5xl font-medium tracking-[-0.045em] leading-[1.08]">
+            Menos espera.<br />Mais presença.
           </h1>
           <p className="mt-4 text-stone-400 text-[15px] leading-relaxed">
-            Chamados em tempo real, mapa do salão e tempo de resposta da equipe — feito para
-            rodízio e casa de alto giro.
+            Cada mesa tem sua vez. Acompanhe os chamados e dê à sua equipe espaço para cuidar de quem está à mesa.
           </p>
         </div>
         <p className="relative text-xs text-stone-500">{RESTAURANT_DEMO.name} · unidade demo</p>
@@ -84,38 +79,44 @@ export default function LoginPage() {
             Entrar no painel
           </h2>
           <p className="text-sm text-stone-500 mt-1.5 mb-8">
-            Use o e-mail da equipe ou o acesso de demonstração.
+            Entre com o e-mail da sua equipe.
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
+              <label htmlFor="login-email" className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
                 E-mail
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   type="email"
+                  id="login-email"
+                  autoComplete="username"
+                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="gerente@saborgrill.com.br"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-cream-paper dark:bg-[#221c18] text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-cream-paper dark:bg-card text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
+              <label htmlFor="login-password" className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
                 Senha
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   type="password"
+                  id="login-password"
+                  autoComplete="current-password"
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-cream-paper dark:bg-[#221c18] text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-cream-paper dark:bg-card text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
             </div>
@@ -133,16 +134,16 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-4">
+          {!isSupabaseConfigured() ? <div className="mt-4">
             <Button
               type="button"
               variant="outline"
               fullWidth
               onClick={() => router.push('/dashboard')}
             >
-              Continuar como João · garçom (demo)
+              Explorar demonstração
             </Button>
-          </div>
+          </div> : null}
         </div>
       </div>
     </div>

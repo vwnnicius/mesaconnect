@@ -15,24 +15,24 @@ const config: Config = {
         card: "var(--card)",
         "card-foreground": "var(--card-foreground)",
         muted: {
-          DEFAULT: "#f0e7dc",
+          DEFAULT: "#f0f2f5",
           foreground: "var(--muted)",
         },
         accent: {
           DEFAULT: "var(--accent)",
-          foreground: "#fff7ed",
+          foreground: "#ffffff",
         },
         espresso: {
-          DEFAULT: "#1f1814",
-          muted: "#3d3229",
+          DEFAULT: "#202329",
+          muted: "#353a43",
         },
         cream: {
-          DEFAULT: "#f3ece3",
-          paper: "#faf6f1",
+          DEFAULT: "var(--background)",
+          paper: "var(--card)",
         },
         primary: {
-          DEFAULT: "#1f1814",
-          foreground: "#faf6f1",
+          DEFAULT: "#202329",
+          foreground: "#ffffff",
         },
         status: {
           available: "#047857",
@@ -43,13 +43,13 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 0 rgba(31,24,20,0.04), 0 8px 24px -16px rgba(31,24,20,0.18)",
+        card: "0 1px 2px rgba(20,25,35,0.025)",
       },
       borderRadius: {
-        box: "12px",
+        box: "16px",
       },
     },
   },

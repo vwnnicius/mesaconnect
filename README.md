@@ -1,5 +1,7 @@
 # 🍽️ MesaConnect
 
+> **Estado do MVP:** há funcionalidades reais e telas demonstrativas. Leia [a auditoria técnica](AUDIT.md) antes de usar em um piloto. Métricas históricas ainda são exemplos; as políticas SQL versionadas precisam de revisão antes de uso com múltiplos restaurantes. A validação desta revisão está em [VALIDATION.md](VALIDATION.md).
+
 > **Sistema de Atendimento em Tempo Real por Mesa para Restaurantes e Rodízios**  
 > Reduzindo o tempo de espera do cliente e maximizando a produtividade da equipe através de hardware inteligente (ESP32) e aplicativo web ágil.
 
@@ -27,7 +29,7 @@ O **MesaConnect** resolve essa dor:
 - **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL 15+)
 - **Tempo Real**: Supabase Realtime (WebSockets)
 - **Autenticação**: Supabase Auth (Perfis: OWNER, MANAGER, WAITER)
-- **Segurança**: Row Level Security (RLS) completo
+- **Segurança**: RLS presente no SQL; endurecimento pendente conforme `AUDIT.md`
 - **Deploy**: [Vercel](https://vercel.com/)
 - **Hardware (Futuro)**: Placas ESP32 via Wi-Fi (HTTP REST / WebSockets)
 
@@ -36,10 +38,9 @@ O **MesaConnect** resolve essa dor:
 ## 🏗️ Arquitetura do Sistema
 
 ```
-[Dispositivo ESP32 Físico]         [Simulador Web (/simulator)]
-          \                                     /
-           \                                   /
-            \---> POST /api/device/events <---/
+[ESP32] -> POST /api/device/events (experimental)
+                           |
+[Cards do simulador] ------+--> processDeviceEvent
                            |
                            v
               [Supabase PostgreSQL & Realtime]
@@ -135,7 +136,7 @@ Preencha as variáveis obtidas no seu painel do Supabase (**Project Settings > A
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anon-publica
 ```
-> **Nota de Execução Imediata**: O MesaConnect possui um **Modo Demo com Fallback Inteligente**. Caso as variáveis ainda não estejam preenchidas, o sistema inicia normalmente com dados simulados do "Rodízio Sabor & Grill" para que você possa testar sem bloqueios.
+> **Demonstração local:** sem variáveis Supabase, o sistema usa dados em memória, perdidos ao recarregar. No modo configurado, falhas ao criar chamados ou enviar avaliações são apresentadas como erros, sem gravação local alternativa. Algumas leituras legadas ainda possuem fallback; veja `AUDIT.md`. O botão de demonstração no login aparece apenas sem configuração Supabase.
 
 ### 4. Rodar o servidor de desenvolvimento
 ```bash
@@ -170,7 +171,7 @@ Antes de conectar placas físicas, você pode validar o fluxo de ponta a ponta:
 4. O chamado aparecerá imediatamente com cronômetro em tempo real:
    - Clique em **[ ATENDER ]** -> O chamado passa para `ACKNOWLEDGED` e o tempo até resposta é gravado.
    - Clique em **[ CONCLUIR ]** -> O atendimento é finalizado e a mesa volta a ficar disponível (`AVAILABLE`).
-5. Acesse `/dashboard` e `/analytics` para ver as métricas atualizadas.
+5. Acesse `/dashboard` para acompanhar fila e mesas. Os indicadores históricos e gráficos de `/dashboard` e `/analytics` ainda usam `DEMO_*` e são identificados na tela.
 
 ---
 
@@ -178,13 +179,13 @@ Antes de conectar placas físicas, você pode validar o fluxo de ponta a ponta:
 
 - URL da mesa: `/evaluate/[slug-do-restaurante]/[numero-da-mesa]`
 - Exemplo para teste: `http://localhost:3000/evaluate/sabor-grill/07`
-- Não requer login: o cliente clica de 1 a 5 estrelas, pode deixar um comentário opcional e envia. O feedback cai instantaneamente em `/evaluations`.
+- Não requer login: o cliente clica de 1 a 5 estrelas, pode deixar um comentário opcional e envia. A tela resolve o ID real da mesa pelo slug e número; erros não confirmam sucesso. `/evaluations` carrega as avaliações ao abrir a página, sem subscrição Realtime própria.
 
 ---
 
 ## 📡 Futura Integração com Hardware Físico (ESP32)
 
-O backend já está preparado para receber requisições HTTP REST de microcontroladores ESP32 conectados à rede Wi-Fi do restaurante.
+O endpoint experimental recebe eventos HTTP e compartilha o serviço de domínio com os cards do simulador. Antes de usar hardware no piloto, faltam autenticação individual de dispositivos, idempotência, limites e contexto Supabase server-side apropriado. O UID sozinho não autentica uma placa. Sem Supabase, o teste HTTP usa um store separado dos cards do browser e não sincroniza os dois ambientes.
 
 ### Endpoint:
 `POST /api/device/events`

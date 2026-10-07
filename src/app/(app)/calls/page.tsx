@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import Link from 'next/link';
 
 export default function CallsPage() {
-  const { calls, loading, refresh, acknowledge, complete } = useCalls();
+  const { calls, loading, error, refresh, acknowledge, complete } = useCalls();
   const [filter, setFilter] = useState<'ALL' | 'CALLING' | 'ACKNOWLEDGED'>('ALL');
 
   const callingCalls = calls.filter((c) => c.status === 'CALLING');
@@ -22,14 +22,14 @@ export default function CallsPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5">
+    <div className="max-w-2xl mx-auto space-y-7">
       <PageHeader
         kicker="Fila do garçom"
         title="Chamados"
-        description="Toque uma vez para assumir; o cronômetro segue até concluir."
+        description="As mesas que esperam há mais tempo aparecem primeiro."
         actions={
           <>
-            <Button size="sm" variant="outline" onClick={() => refresh()} title="Atualizar">
+            <Button size="sm" variant="outline" onClick={() => refresh()} title="Atualizar" aria-label="Atualizar fila">
               <RotateCw className="w-4 h-4" />
             </Button>
             <Link href="/simulator">
@@ -41,7 +41,7 @@ export default function CallsPage() {
         }
       />
 
-      <div className="flex rounded-lg bg-white/70 dark:bg-black/20 p-1 text-xs font-medium border border-border">
+      <div className="flex rounded-xl bg-card p-1 text-xs font-medium border border-border" role="group" aria-label="Filtrar chamados">
         {(
           [
             ['ALL', `Todos (${calls.length})`],
@@ -52,24 +52,26 @@ export default function CallsPage() {
           <button
             key={key}
             onClick={() => setFilter(key)}
-            className={`flex-1 py-2 rounded-md transition-colors ${
+            aria-pressed={filter === key}
+            className={`flex-1 min-h-11 px-1 py-2 rounded-lg transition-colors ${
               filter === key
-                ? 'bg-espresso text-cream dark:bg-cream dark:text-espresso'
-                : 'text-stone-500 hover:text-stone-800'
+                ? 'bg-background text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {label}
           </button>
         ))}
       </div>
+      {error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950 dark:border-red-900 dark:text-red-200">{error}</p> : null}
 
       {loading ? (
         <div className="py-16 text-center text-stone-400 text-sm">Carregando fila…</div>
       ) : filteredCalls.length === 0 ? (
-        <div className="py-14 text-center rounded-box border border-border bg-cream-paper dark:bg-[#221c18] px-6">
+        <div className="py-14 text-center rounded-box border border-border bg-cream-paper dark:bg-card px-6">
           <h3 className="text-base font-semibold">Fila vazia</h3>
           <p className="text-sm text-stone-500 mt-1 max-w-sm mx-auto">
-            Use o simulador para disparar um chamado e ver o card aparecer com o cronômetro.
+            {filter === 'ALL' ? 'Nenhuma mesa precisa de atendimento agora.' : 'Não há chamados neste filtro.'}
           </p>
           <Link href="/simulator" className="inline-block mt-4">
             <Button size="sm" variant="accent">

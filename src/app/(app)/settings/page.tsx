@@ -13,15 +13,21 @@ export default function SettingsPage() {
   const { tables } = useTables();
   const [supabaseConnected, setSupabaseConnected] = useState(false);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState(false);
 
   useEffect(() => {
     setSupabaseConnected(isSupabaseConfigured());
   }, []);
 
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedLink(id);
-    setTimeout(() => setCopiedLink(null), 2000);
+  const copyToClipboard = async (text: string, id: string) => {
+    setCopyError(false);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedLink(id);
+      setTimeout(() => setCopiedLink(null), 2000);
+    } catch {
+      setCopyError(true);
+    }
   };
 
   return (
@@ -69,7 +75,7 @@ export default function SettingsPage() {
             />
             <span>
               {supabaseConnected
-                ? 'Conectado — realtime ativo'
+                ? 'Supabase configurado'
                 : 'Modo local — configure as variáveis na Vercel'}
             </span>
           </div>
@@ -94,12 +100,13 @@ export default function SettingsPage() {
               >
                 <div className="min-w-0">
                   <span className="font-medium">Mesa {table.number}</span>
-                  <span className="font-mono text-stone-400 ml-2">{url}</span>
+                  <span className="block truncate font-mono text-stone-400 mt-1">{url}</span>
                 </div>
                 <div className="flex items-center gap-0.5 shrink-0">
                   <button
                     onClick={() => copyToClipboard(`${window.location.origin}${url}`, table.id)}
-                    className="p-1 rounded-md hover:bg-cream dark:hover:bg-stone-800 text-stone-500"
+                    aria-label={`Copiar link da mesa ${table.number}`}
+                    className="p-3 rounded-lg hover:bg-cream dark:hover:bg-stone-800 text-stone-500"
                   >
                     {copiedLink === table.id ? (
                       <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />
@@ -109,8 +116,9 @@ export default function SettingsPage() {
                   </button>
                   <Link
                     href={url}
+                    aria-label={`Abrir avaliação da mesa ${table.number}`}
                     target="_blank"
-                    className="p-1 rounded-md hover:bg-cream dark:hover:bg-stone-800 text-stone-500"
+                    className="p-3 rounded-lg hover:bg-cream dark:hover:bg-stone-800 text-stone-500"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </Link>
@@ -119,11 +127,12 @@ export default function SettingsPage() {
             );
           })}
         </div>
+        {copyError ? <p role="alert" className="text-xs text-red-600 mt-3">Não foi possível copiar. Abra o link para copiar o endereço.</p> : null}
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Dispositivos ESP32</CardTitle>
+          <CardTitle>Identificadores previstos para os dispositivos</CardTitle>
         </CardHeader>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
           {tables.map((table) => (

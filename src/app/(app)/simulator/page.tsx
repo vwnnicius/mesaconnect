@@ -64,7 +64,7 @@ export default function SimulatorPage() {
         }
       />
 
-      <div className="rounded-box border border-border bg-cream-paper dark:bg-[#221c18] p-4 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+      <div className="rounded-box border border-border bg-cream-paper dark:bg-card p-4 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
         Chame uma mesa, abra a fila e atenda. O ciclo completo grava tempo de resposta e devolve a
         mesa ao mapa.
       </div>
@@ -118,7 +118,7 @@ export default function SimulatorPage() {
             </div>
           </div>
           {apiResponse ? (
-            <pre className="p-3 rounded-lg bg-espresso text-cream font-mono text-xs overflow-x-auto">
+            <pre className="p-3 rounded-lg bg-espresso text-white font-mono text-xs overflow-x-auto">
               {apiResponse}
             </pre>
           ) : null}

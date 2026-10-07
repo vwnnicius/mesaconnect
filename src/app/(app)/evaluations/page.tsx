@@ -30,7 +30,8 @@ export default function EvaluationsPage() {
   const avgRating =
     evaluations.length > 0
       ? (evaluations.reduce((acc, e) => acc + e.rating, 0) / evaluations.length).toFixed(1)
-      : '5.0';
+      : '—';
+  const approval = evaluations.length ? `${Math.round(evaluations.filter((e) => e.rating >= 4).length / evaluations.length * 100)}%` : '—';
 
   return (
     <div className="space-y-5">
@@ -74,7 +75,7 @@ export default function EvaluationsPage() {
         </Card>
         <Card className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-semibold text-xl tabular-nums">
-            96%
+            {approval}
           </div>
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-stone-500">

@@ -14,6 +14,7 @@ import { RESTAURANT_DEMO } from '@/lib/constants';
 export type CallsApi = {
   calls: ServiceCall[];
   loading: boolean;
+  error: string | null;
   refresh: () => Promise<void>;
   acknowledge: (callId: string) => Promise<void>;
   complete: (callId: string) => Promise<void>;
@@ -24,13 +25,16 @@ export const CallsContext = createContext<CallsApi | null>(null);
 export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsApi {
   const [calls, setCalls] = useState<ServiceCall[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchCalls = useCallback(async () => {
     try {
       const data = await getActiveCalls(restaurantId);
       setCalls(data);
+      setError(null);
     } catch (err) {
       console.error('Erro ao buscar chamados:', err);
+      setError('Não foi possível atualizar a fila. Verifique a conexão e tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -56,26 +60,21 @@ export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsA
   }, [fetchCalls, restaurantId]);
 
   const acknowledge = async (callId: string) => {
-    setCalls((prev) =>
-      prev.map((c) =>
-        c.id === callId
-          ? { ...c, status: 'ACKNOWLEDGED', acknowledged_at: new Date().toISOString() }
-          : c
-      )
-    );
-    await acknowledgeServiceCall(callId);
-    fetchCalls();
+    const saved = await acknowledgeServiceCall(callId);
+    if (!saved) throw new Error('O chamado não pôde ser assumido.');
+    await fetchCalls();
   };
 
   const complete = async (callId: string) => {
-    setCalls((prev) => prev.filter((c) => c.id !== callId));
-    await completeServiceCall(callId);
-    fetchCalls();
+    const saved = await completeServiceCall(callId);
+    if (!saved) throw new Error('O chamado não pôde ser concluído.');
+    await fetchCalls();
   };
 
   return {
     calls,
     loading,
+    error,
     refresh: fetchCalls,
     acknowledge,
     complete,
