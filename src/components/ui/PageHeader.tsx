@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface PageHeaderProps {
   kicker?: string;
@@ -19,8 +19,8 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4',
-        className
+        "flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4",
+        className,
       )}
     >
       <div className="min-w-0">
@@ -39,7 +39,9 @@ export function PageHeader({
         ) : null}
       </div>
       {actions ? (
-        <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {actions}
+        </div>
       ) : null}
     </div>
   );

@@ -1,105 +1,241 @@
-'use client';
-
-import React, { useState } from 'react';
-import { useTables } from '@/hooks/useTables';
-import { TableCard } from '@/components/tables/TableCard';
-import { TableStatus } from '@/types';
-import { TABLE_STATUS_CONFIG } from '@/lib/constants';
-import { Button } from '@/components/ui/Button';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { RotateCw } from 'lucide-react';
-import Link from 'next/link';
-
+"use client";
+import { useEffect, useState } from "react";
+import { Save, Pencil, LayoutGrid, RotateCcw } from "lucide-react";
+import { useTables } from "@/hooks/useTables";
+import { useFloorLayout } from "@/hooks/useFloorLayout";
+import { useWorkspace } from "@/providers/WorkspaceProvider";
+import { FloorPlan } from "@/components/tables/FloorPlan";
+import { TableCard } from "@/components/tables/TableCard";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { defaultLayout, type SeatPosition } from "@/lib/floor-layout";
 export default function TablesPage() {
-  const { tables, loading, refresh } = useTables();
-  const [filter, setFilter] = useState<TableStatus | 'ALL'>('ALL');
-
-  const filteredTables = tables.filter((t) => {
-    if (filter === 'ALL') return true;
-    return t.status === filter;
-  });
-
-  const statusCounts: Record<TableStatus, number> = {
-    AVAILABLE: tables.filter((t) => t.status === 'AVAILABLE').length,
-    CALLING: tables.filter((t) => t.status === 'CALLING').length,
-    ACKNOWLEDGED: tables.filter((t) => t.status === 'ACKNOWLEDGED').length,
-    DO_NOT_DISTURB: tables.filter((t) => t.status === 'DO_NOT_DISTURB').length,
-    COMPLETED: tables.filter((t) => t.status === 'COMPLETED').length,
-    OFFLINE: tables.filter((t) => t.status === 'OFFLINE').length,
+  const { tables } = useTables();
+  const { manager, demo } = useWorkspace();
+  const floor = useFloorLayout();
+  const [selected, setSelected] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [list, setList] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+  const seat = floor.layout.positions.find((item) => item.number === selected);
+  const update = (number: string, patch: Partial<SeatPosition>) => {
+    floor.setLayout((prev) => ({
+      ...prev,
+      positions: prev.positions.map((item) =>
+        item.number === number ? { ...item, ...patch } : item,
+      ),
+    }));
+    setDirty(true);
+    setMessage("");
   };
-
+  const save = async () => {
+    setSaving(true);
+    try {
+      await floor.save(floor.layout);
+      setDirty(false);
+      setMessage(
+        demo
+          ? "Layout salvo neste navegador de demonstração."
+          : "Layout salvo para este estabelecimento.",
+      );
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Erro ao salvar");
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
-        kicker="Salão"
-        title="Mapa de mesas"
-        description="Veja quais mesas precisam da atenção da equipe."
+        title="Mesas"
+        description="Organize o salão do jeito que ele funciona na vida real."
         actions={
           <>
-            <Button size="sm" variant="outline" onClick={() => refresh()} title="Atualizar" aria-label="Atualizar mesas">
-              <RotateCw className="w-4 h-4" />
-            </Button>
-            <Link href="/simulator">
-              <Button size="sm" variant="outline">
-                Simulador
-              </Button>
-            </Link>
+            <button className="action-outline" onClick={() => setList(!list)}>
+              <LayoutGrid size={16} />
+              {list ? "Ver planta" : "Ver lista"}
+            </button>
+            {manager ? (
+              <button
+                className="action-solid"
+                onClick={() => {
+                  setEditing(!editing);
+                  setList(false);
+                }}
+              >
+                <Pencil size={15} />
+                {editing ? "Concluir edição" : "Personalizar salão"}
+              </button>
+            ) : null}
           </>
         }
       />
-
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar mesas">
-        <button
-          onClick={() => setFilter('ALL')}
-          aria-pressed={filter === 'ALL'}
-          className={`min-h-11 px-3 py-2 rounded-lg text-xs font-medium border ${
-            filter === 'ALL'
-              ? 'bg-espresso text-white border-transparent dark:bg-stone-100 dark:text-espresso'
-              : 'bg-card text-muted-foreground border-border hover:border-stone-400'
-          }`}
-        >
-          Todas ({tables.length})
-        </button>
-
-        {(['AVAILABLE', 'CALLING', 'ACKNOWLEDGED', 'DO_NOT_DISTURB', 'OFFLINE'] as TableStatus[]).map(
-          (statusKey) => {
-            const cfg = TABLE_STATUS_CONFIG[statusKey];
-            const isSelected = filter === statusKey;
-            return (
-              <button
-                key={statusKey}
-                onClick={() => setFilter(statusKey)}
-                aria-pressed={isSelected}
-                className={`inline-flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg text-xs font-medium border ${
-                  isSelected
-                    ? `${cfg.bgColor} ${cfg.textColor} ${cfg.borderColor}`
-                    : 'bg-card text-muted-foreground border-border hover:border-stone-400'
-                }`}
-              >
-                {cfg.label}
-                <span className="tabular-nums opacity-70">({statusCounts[statusKey]})</span>
-              </button>
-            );
-          }
-        )}
+      {floor.error ? (
+        <p role="alert" className="form-error">
+          {floor.error}
+        </p>
+      ) : null}
+      <div className={`floor-editor ${editing ? "floor-editor-active" : ""}`}>
+        <section className="surface">
+          {floor.loading ? (
+            <p>Carregando salão…</p>
+          ) : list ? (
+            <div className="table-list-grid">
+              {tables.map((table) => (
+                <TableCard key={table.id} table={table} />
+              ))}
+            </div>
+          ) : (
+            <FloorPlan
+              tables={tables}
+              layout={floor.layout}
+              selected={selected}
+              onSelect={setSelected}
+              editing={editing}
+              onMove={(number, position) => update(number, position)}
+            />
+          )}
+        </section>
+        {editing ? (
+          <aside className="surface editor-inspector">
+            <h2>Personalizar layout</h2>
+            <label>
+              Nome do salão
+              <input
+                maxLength={60}
+                value={floor.layout.name}
+                onChange={(event) => {
+                  floor.setLayout({
+                    ...floor.layout,
+                    name: event.target.value,
+                  });
+                  setDirty(true);
+                }}
+              />
+            </label>
+            {seat ? (
+              <>
+                <h3>Mesa {seat.number}</h3>
+                <label>
+                  Formato
+                  <select
+                    value={seat.shape}
+                    onChange={(event) =>
+                      update(seat.number, {
+                        shape: event.target.value as SeatPosition["shape"],
+                      })
+                    }
+                  >
+                    <option value="square">Quadrada</option>
+                    <option value="round">Redonda</option>
+                    <option value="rectangle">Retangular</option>
+                  </select>
+                </label>
+                <label>
+                  Lugares
+                  <input
+                    type="number"
+                    min={1}
+                    max={12}
+                    value={seat.seats}
+                    onChange={(event) =>
+                      update(seat.number, {
+                        seats: Math.max(
+                          1,
+                          Math.min(12, Number(event.target.value)),
+                        ),
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  Setor
+                  <input
+                    maxLength={60}
+                    value={seat.sector}
+                    onChange={(event) =>
+                      update(seat.number, { sector: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  Rotação
+                  <input
+                    type="range"
+                    min={0}
+                    max={360}
+                    step={15}
+                    value={seat.rotation}
+                    onChange={(event) =>
+                      update(seat.number, {
+                        rotation: Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+                <p>Arraste a mesa ou use as setas do teclado.</p>
+              </>
+            ) : (
+              <p>Selecione uma mesa para editar formato, lugares e setor.</p>
+            )}
+            <button
+              className="action-outline"
+              onClick={() => {
+                floor.setLayout(
+                  defaultLayout(tables.map((table) => table.number)),
+                );
+                setDirty(true);
+              }}
+            >
+              <RotateCcw size={15} />
+              Organizar em grade
+            </button>
+          </aside>
+        ) : selected ? (
+          <aside className="surface editor-inspector">
+            <h2>Mesa {selected}</h2>
+            <p>{seat?.sector}</p>
+            <p>{seat?.seats} lugares</p>
+            {tables
+              .filter((table) => table.number === selected)
+              .map((table) => (
+                <TableCard key={table.id} table={table} />
+              ))}
+          </aside>
+        ) : null}
       </div>
-
-      {loading ? (
-        <div className="py-16 text-center text-stone-400 text-sm">Carregando salão…</div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {filteredTables.map((table) => (
-            <TableCard key={table.id} table={table} />
-          ))}
+      {manager && dirty ? (
+        <div className="save-bar">
+          <span>Você tem alterações não salvas.</span>
+          <button
+            className="action-outline"
+            onClick={async () => {
+              await floor.reload();
+              setDirty(false);
+            }}
+          >
+            Descartar
+          </button>
+          <button className="action-solid" disabled={saving} onClick={save}>
+            <Save size={15} />
+            {saving ? "Salvando…" : "Salvar layout"}
+          </button>
         </div>
-      )}
-
-      <p className="text-xs text-stone-500">
-        Cada mesa tem um QR de avaliação.{' '}
-        <Link href="/settings" className="font-medium text-stone-800 dark:text-stone-200 underline">
-          Ver links
-        </Link>
-      </p>
+      ) : null}
+      {message ? (
+        <p role="status" className="form-message">
+          {message}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import { createBrowserClient } from '@supabase/ssr';
-import { Database } from '@/types/database';
+import { createBrowserClient } from "@supabase/ssr";
+import { Database } from "@/types/database";
 
 export function isSupabaseConfigured(): boolean {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,8 +10,8 @@ export function isSupabaseConfigured(): boolean {
   return !!(
     url &&
     key &&
-    !url.includes('sua-url-aqui') &&
-    !key.includes('sua-anon-key')
+    !url.includes("sua-url-aqui") &&
+    !key.includes("sua-anon-key")
   );
 }
 
@@ -24,8 +24,8 @@ export function createClient() {
   if (!url || !key) {
     // Retorna cliente seguro com dummy URL durante pré-renderização/build
     return createBrowserClient<Database>(
-      'https://dummy-mesaconnect.supabase.co',
-      'dummy-anon-key'
+      "https://dummy-mesaconnect.supabase.co",
+      "dummy-anon-key",
     );
   }
 

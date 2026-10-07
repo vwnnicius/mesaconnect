@@ -6,21 +6,21 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type UserRole = 'OWNER' | 'MANAGER' | 'WAITER';
+export type UserRole = "OWNER" | "MANAGER" | "WAITER";
 
 export type TableStatus =
-  | 'AVAILABLE'
-  | 'DO_NOT_DISTURB'
-  | 'CALLING'
-  | 'ACKNOWLEDGED'
-  | 'COMPLETED'
-  | 'OFFLINE';
+  | "AVAILABLE"
+  | "DO_NOT_DISTURB"
+  | "CALLING"
+  | "ACKNOWLEDGED"
+  | "COMPLETED"
+  | "OFFLINE";
 
 export type ServiceCallStatus =
-  | 'CALLING'
-  | 'ACKNOWLEDGED'
-  | 'COMPLETED'
-  | 'CANCELLED';
+  | "CALLING"
+  | "ACKNOWLEDGED"
+  | "COMPLETED"
+  | "CANCELLED";
 
 export interface Restaurant {
   id: string;
@@ -91,49 +91,9 @@ export interface DeviceEvent {
   id: string;
   device_id: string | null;
   table_id: string | null;
-  event_type: 'CALL' | 'DO_NOT_DISTURB' | 'RESET' | 'HEARTBEAT' | string;
+  event_type: "CALL" | "DO_NOT_DISTURB" | "RESET" | "HEARTBEAT" | string;
   payload: Json;
   created_at: string;
 }
 
-export interface Database {
-  public: {
-    Tables: {
-      restaurants: {
-        Row: Restaurant;
-        Insert: Omit<Restaurant, 'id' | 'created_at'> & { id?: string; created_at?: string };
-        Update: Partial<Restaurant>;
-      };
-      profiles: {
-        Row: Profile;
-        Insert: Omit<Profile, 'created_at'> & { created_at?: string };
-        Update: Partial<Profile>;
-      };
-      tables: {
-        Row: Table;
-        Insert: Omit<Table, 'id' | 'created_at'> & { id?: string; created_at?: string };
-        Update: Partial<Table>;
-      };
-      devices: {
-        Row: Device;
-        Insert: Omit<Device, 'id' | 'created_at'> & { id?: string; created_at?: string };
-        Update: Partial<Device>;
-      };
-      service_calls: {
-        Row: ServiceCall;
-        Insert: Omit<ServiceCall, 'id' | 'created_at'> & { id?: string; created_at?: string };
-        Update: Partial<ServiceCall>;
-      };
-      evaluations: {
-        Row: Evaluation;
-        Insert: Omit<Evaluation, 'id' | 'created_at'> & { id?: string; created_at?: string };
-        Update: Partial<Evaluation>;
-      };
-      device_events: {
-        Row: DeviceEvent;
-        Insert: Omit<DeviceEvent, 'id' | 'created_at'> & { id?: string; created_at?: string };
-        Update: Partial<DeviceEvent>;
-      };
-    };
-  };
-}
+export type { Database } from "./supabase-generated";

@@ -31,6 +31,8 @@ yarn-error.log*
 
 # Vercel
 .vercel
+supabase/.temp/
+npm-audit-local.json
 
 # TypeScript
 *.tsbuildinfo

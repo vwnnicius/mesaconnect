@@ -1,9 +1,9 @@
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export function subscribeTableChanges(
   table: string,
   filter: string,
-  onChange: () => void
+  onChange: () => void,
 ): () => void {
   if (!isSupabaseConfigured()) return () => {};
 
@@ -13,16 +13,16 @@ export function subscribeTableChanges(
   const channel = supabase
     .channel(channelName)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: '*',
-        schema: 'public',
+        event: "*",
+        schema: "public",
         table,
         filter,
       },
       () => {
         onChange();
-      }
+      },
     )
     .subscribe();
 

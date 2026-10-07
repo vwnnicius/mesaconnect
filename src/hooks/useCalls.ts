@@ -1,15 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { ServiceCall } from '@/types';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+} from "react";
+import { ServiceCall } from "@/types";
 import {
   getActiveCalls,
   acknowledgeServiceCall,
   completeServiceCall,
-} from '@/services/callsService';
-import { inMemoryStore } from '@/services/mockStore';
-import { subscribeTableChanges } from '@/lib/realtime';
-import { RESTAURANT_DEMO } from '@/lib/constants';
+} from "@/services/callsService";
+import { inMemoryStore } from "@/services/mockStore";
+import { subscribeTableChanges } from "@/lib/realtime";
+import { RESTAURANT_DEMO } from "@/lib/constants";
 
 export type CallsApi = {
   calls: ServiceCall[];
@@ -22,7 +28,9 @@ export type CallsApi = {
 
 export const CallsContext = createContext<CallsApi | null>(null);
 
-export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsApi {
+export function useCallsState(
+  restaurantId: string = RESTAURANT_DEMO.id,
+): CallsApi {
   const [calls, setCalls] = useState<ServiceCall[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +41,10 @@ export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsA
       setCalls(data);
       setError(null);
     } catch (err) {
-      console.error('Erro ao buscar chamados:', err);
-      setError('Não foi possível atualizar a fila. Verifique a conexão e tente novamente.');
+      console.error("Erro ao buscar chamados:", err);
+      setError(
+        "Não foi possível atualizar a fila. Verifique a conexão e tente novamente.",
+      );
     } finally {
       setLoading(false);
     }
@@ -48,9 +58,9 @@ export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsA
     });
 
     const unsubscribeRealtime = subscribeTableChanges(
-      'service_calls',
+      "service_calls",
       `restaurant_id=eq.${restaurantId}`,
-      fetchCalls
+      fetchCalls,
     );
 
     return () => {
@@ -61,13 +71,13 @@ export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsA
 
   const acknowledge = async (callId: string) => {
     const saved = await acknowledgeServiceCall(callId);
-    if (!saved) throw new Error('O chamado não pôde ser assumido.');
+    if (!saved) throw new Error("O chamado não pôde ser assumido.");
     await fetchCalls();
   };
 
   const complete = async (callId: string) => {
     const saved = await completeServiceCall(callId);
-    if (!saved) throw new Error('O chamado não pôde ser concluído.');
+    if (!saved) throw new Error("O chamado não pôde ser concluído.");
     await fetchCalls();
   };
 
@@ -84,5 +94,5 @@ export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsA
 export function useCalls(): CallsApi {
   const ctx = useContext(CallsContext);
   if (ctx) return ctx;
-  throw new Error('useCalls deve ser usado dentro de CallsProvider');
+  throw new Error("useCalls deve ser usado dentro de CallsProvider");
 }

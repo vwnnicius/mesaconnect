@@ -1,62 +1,68 @@
-'use client';
-
-import React from 'react';
-import Link from 'next/link';
-import { QrCode, Play, Bell } from 'lucide-react';
-import { RESTAURANT_DEMO } from '@/lib/constants';
-import { useCalls } from '@/hooks/useCalls';
-import { BrandMark } from '@/components/layout/BrandMark';
-import { isSupabaseConfigured } from '@/lib/supabase/client';
-
+"use client";
+import Link from "next/link";
+import { Bell } from "lucide-react";
+import { useCalls } from "@/hooks/useCalls";
+import { useWorkspace } from "@/providers/WorkspaceProvider";
+import { AssetImage } from "@/components/ui/AssetImage";
+import { roleName } from "@/lib/workspace-types";
 export function Header() {
   const { calls } = useCalls();
-  const callingCount = calls.filter((c) => c.status === 'CALLING').length;
-
+  const { restaurant, profile, platformAdmin, units, selectUnit, demo } =
+    useWorkspace();
+  const count = calls.filter((c) => c.status === "CALLING").length;
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between h-[76px] px-5 md:px-10 bg-background/95 backdrop-blur-md border-b border-border">
-      <div className="flex items-center gap-2 md:hidden">
-        <BrandMark className="w-7 h-7" />
-        <span className="font-semibold text-sm">MesaConnect</span>
-        {!isSupabaseConfigured() ? <span className="text-[10px] text-muted-foreground border border-border px-1.5 py-0.5 rounded">Demo</span> : null}
+    <header className="workspace-header">
+      <div className="workspace-unit">
+        <AssetImage
+          path={restaurant.logo_path}
+          name={restaurant.name}
+          kind="logo"
+        />
+        {platformAdmin ? (
+          <select
+            aria-label="Estabelecimento"
+            value={restaurant.id}
+            onChange={(e) => selectUnit(e.target.value)}
+          >
+            {units.map((unit) => (
+              <option key={unit.id} value={unit.id}>
+                {unit.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span>{restaurant.name}</span>
+        )}
+        {demo && <small>Demo</small>}
       </div>
-
-      <div className="hidden md:flex items-center gap-3 text-xs text-stone-500">
-        <span className="font-medium text-stone-700 dark:text-stone-300">
-          {RESTAURANT_DEMO.name}
+      <div className="workspace-header-right">
+        <span className="workspace-date">
+          {new Date().toLocaleDateString("pt-BR", {
+            weekday: "short",
+            day: "numeric",
+            month: "long",
+          })}
         </span>
-        <span className="text-border">·</span>
-        <span className="inline-flex items-center gap-1.5">
-          {isSupabaseConfigured() ? 'Operação do salão' : 'Demonstração local'}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-1.5">
-        <Link
-          href="/demo"
-          className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:bg-white/70 dark:text-stone-300 dark:hover:bg-white/5"
-        >
-          <Play className="w-3.5 h-3.5" />
-          Demo interativa
-        </Link>
-        <Link
-          href={`/evaluate/${RESTAURANT_DEMO.slug}/07`}
-          target="_blank"
-          className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:bg-white/70 dark:text-stone-300 dark:hover:bg-white/5"
-        >
-          <QrCode className="w-3.5 h-3.5" />
-          QR Mesa 07
-        </Link>
         <Link
           href="/calls"
-          aria-label={`${callingCount} mesas aguardando atendimento`}
-          className={`inline-flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-xl text-xs font-semibold ${
-            callingCount > 0
-              ? 'bg-accent text-white'
-              : 'text-stone-600 hover:bg-white/70 dark:text-stone-300 dark:hover:bg-white/5'
-          }`}
+          className="workspace-notification"
+          aria-label={`${count} chamados aguardando`}
         >
-          <Bell className="w-3.5 h-3.5" />
-          {callingCount}
+          <Bell size={19} />
+          {count > 0 && <b>{count}</b>}
+        </Link>
+        <Link href="/profile" className="workspace-person">
+          <AssetImage
+            path={profile.avatar_path}
+            name={profile.name}
+            kind="avatar"
+          />
+          <span>
+            <strong>{profile.name}</strong>
+            <small>
+              {platformAdmin ? "Administrador geral" : roleName[profile.role]}
+            </small>
+          </span>
         </Link>
       </div>
     </header>

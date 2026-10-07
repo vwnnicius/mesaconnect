@@ -1,3 +1,18 @@
+# Situação após a reconstrução — 7 de outubro de 2026
+
+A auditoria original abaixo registra o ponto de partida. Nesta revisão houve acesso ao Supabase real, implantação de cinco migrações e validação de isolamento e fluxo em transações revertidas.
+
+Resolvido: unidade fixa na operação autenticada, permissões anônimas amplas, autopromoção pelo perfil, estados divergentes, reset que escondia chamado, ausência de credencial física, indicadores fictícios, QR com identificação inválida e personalização sem persistência. As telas usam unidade/papel reais, o salão salva posições por restaurante e o simulador e o gateway físico compartilham o domínio transacional.
+
+Implementado: identidade visual baseada nas referências, login, fotos/logos, gestão da equipe, criação de estabelecimentos pelo administrador geral, avaliações/QR, relatórios, pareamento e painel de garçom responsivo. A demonstração permanece separada da operação.
+
+Ainda incompleto para escala: firmware e teste físico, retorno de estado para LED, detecção automática de offline, fila em queda de Wi-Fi, proteção contra abuso de avaliações públicas, agregação/paginação além de 1.000 registros e testes de reconexão Realtime. Persistem advisories de dependências que demandam atualização principal e configuração de proteção de senhas vazadas.
+
+Resultados e limites: [VALIDATION.md](VALIDATION.md). Papéis, implantação e hardware: [guia de operação](docs/OPERACAO-E-HARDWARE.md).
+
+---
+
+## Auditoria inicial (histórico)
 # Auditoria MesaConnect — 7 de outubro de 2026
 
 Base inspecionada: commit `2df15c7`, repositório `vwnnicius/mesaconnect`.

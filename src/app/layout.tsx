@@ -1,16 +1,17 @@
-import type { Metadata, Viewport } from 'next';
-import './globals.css';
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+import "./hospitality.css";
 
 export const metadata: Metadata = {
-  title: 'MesaConnect — Atendimento por mesa em tempo real',
+  title: "MesaConnect — Atendimento por mesa em tempo real",
   description:
-    'Painel operacional para restaurantes e rodízios: chamados da mesa, mapa do salão e SLA da equipe.',
+    "Painel operacional para restaurantes e rodízios: chamados da mesa, mapa do salão e SLA da equipe.",
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
-  themeColor: '#f7f8fa',
+  themeColor: "#f7f8fa",
 };
 
 export default function RootLayout({

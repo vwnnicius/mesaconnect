@@ -1,23 +1,30 @@
-import { cn } from '@/lib/utils';
-
+import { cn } from "@/lib/utils";
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center justify-center rounded-lg bg-accent text-white shadow-sm',
-        className
-      )}
+    <svg
+      viewBox="0 0 36 36"
+      fill="none"
+      className={cn("text-accent shrink-0", className || "w-9 h-9")}
       aria-hidden
     >
-      <svg viewBox="0 0 24 24" className="w-[58%] h-[58%]" fill="none">
-        <ellipse cx="12" cy="14.5" rx="7" ry="4" stroke="currentColor" strokeWidth="1.7" />
-        <path
-          d="M6 11.2C6 8.4 8.7 6.4 12 6.4s6 2 6 4.8"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-        />
-      </svg>
-    </span>
+      <path
+        d="M8 9a15 15 0 0 1 23 12"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M27 29A15 15 0 0 1 4 15"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 19h16M13 19v8m10-8v8m-9-13a6 6 0 0 1 8 0m-6-4a3 3 0 0 1 4 0"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }

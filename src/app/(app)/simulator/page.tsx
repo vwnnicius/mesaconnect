@@ -1,129 +1,159 @@
-'use client';
-
-import React, { useState } from 'react';
-import { useTables } from '@/hooks/useTables';
-import { SimulatorTableCard } from '@/components/simulator/SimulatorTableCard';
-import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { RefreshCw, Send, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
-
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { useTables } from "@/hooks/useTables";
+import { useCalls } from "@/hooks/useCalls";
+import { useWorkspace } from "@/providers/WorkspaceProvider";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { TABLE_STATUS_CONFIG } from "@/lib/constants";
+import {
+  simulateTableEvent,
+  type DeviceEventType,
+} from "@/services/deviceService";
 export default function SimulatorPage() {
-  const { tables, refresh } = useTables();
-  const [selectedDeviceUid, setSelectedDeviceUid] = useState('MESA-007-ESP32');
-  const [selectedEvent, setSelectedEvent] = useState<
-    'CALL' | 'DO_NOT_DISTURB' | 'RESET' | 'HEARTBEAT'
-  >('CALL');
-  const [apiResponse, setApiResponse] = useState<string | null>(null);
-  const [sendingApi, setSendingApi] = useState(false);
-
-  const testApiPost = async () => {
-    setSendingApi(true);
-    setApiResponse(null);
+  const { tables, refresh, error } = useTables();
+  const calls = useCalls();
+  const { manager } = useWorkspace();
+  const [events, setEvents] = useState<{ text: string; time: string }[]>([]);
+  const [busy, setBusy] = useState("");
+  const [message, setMessage] = useState("");
+  const trigger = async (id: string, event: DeviceEventType) => {
+    const table = tables.find((t) => t.id === id);
+    if (!table) return;
+    setBusy(id);
+    setMessage("");
     try {
-      const res = await fetch('/api/device/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          device_uid: selectedDeviceUid,
-          event_type: selectedEvent,
-          timestamp: new Date().toISOString(),
-        }),
-      });
-      const data = await res.json();
-      setApiResponse(JSON.stringify(data, null, 2));
-      refresh();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Falha na requisição';
-      setApiResponse(JSON.stringify({ error: message }, null, 2));
+      await simulateTableEvent(table, event);
+      setEvents((prev) =>
+        [
+          {
+            text: `Mesa ${table.number} · ${event === "CALL" ? "Chamou atendimento" : event === "RESET" ? "Disponível" : event === "DO_NOT_DISTURB" ? "Não incomodar" : "Conectada"}`,
+            time: new Date().toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+          ...prev,
+        ].slice(0, 20),
+      );
+      await Promise.all([refresh(), calls.refresh()]);
+    } catch (e) {
+      setMessage(
+        e instanceof Error ? e.message : "Não foi possível registrar o evento.",
+      );
     } finally {
-      setSendingApi(false);
+      setBusy("");
     }
   };
-
+  if (!manager)
+    return (
+      <div className="surface">
+        O simulador está disponível para a administração.
+      </div>
+    );
   return (
     <div className="space-y-6">
       <PageHeader
-        kicker="Hardware"
-        title="Simulador ESP32"
-        description="Dispara os mesmos eventos Wi-Fi que a placa física enviará para o backend."
+        title="Simulador"
+        description="Experimente os sinais da mesa antes de conectar o equipamento físico."
         actions={
-          <>
-            <Link href="/calls">
-              <Button size="md" variant="accent">
-                Ver fila
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Button size="md" variant="outline" onClick={() => refresh()}>
-              <RefreshCw className="w-4 h-4" />
-              Atualizar
-            </Button>
-          </>
+          <Link className="action-solid" href="/calls">
+            Abrir chamados →
+          </Link>
         }
       />
-
-      <div className="rounded-box border border-border bg-cream-paper dark:bg-card p-4 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-        Chame uma mesa, abra a fila e atenda. O ciclo completo grava tempo de resposta e devolve a
-        mesa ao mapa.
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-        {tables.map((table) => (
-          <SimulatorTableCard key={table.id} table={table} onEventTriggered={() => refresh()} />
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>POST /api/device/events</CardTitle>
-        </CardHeader>
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-[11px] font-medium text-stone-500 mb-1">device_uid</label>
-              <select
-                value={selectedDeviceUid}
-                onChange={(e) => setSelectedDeviceUid(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-cream dark:bg-stone-900 text-xs"
-              >
-                {tables.map((t) => (
-                  <option key={t.id} value={`MESA-${t.number.padStart(3, '0')}-ESP32`}>
-                    MESA-{t.number.padStart(3, '0')}-ESP32
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-medium text-stone-500 mb-1">event_type</label>
-              <select
-                value={selectedEvent}
-                onChange={(e) =>
-                  setSelectedEvent(e.target.value as 'CALL' | 'DO_NOT_DISTURB' | 'RESET' | 'HEARTBEAT')
-                }
-                className="w-full px-3 py-2 rounded-lg border border-border bg-cream dark:bg-stone-900 text-xs"
-              >
-                <option value="CALL">CALL</option>
-                <option value="DO_NOT_DISTURB">DO_NOT_DISTURB</option>
-                <option value="RESET">RESET</option>
-                <option value="HEARTBEAT">HEARTBEAT</option>
-              </select>
-            </div>
-            <div className="flex items-end">
-              <Button size="md" fullWidth onClick={testApiPost} disabled={sendingApi}>
-                <Send className="w-3.5 h-3.5" />
-                {sendingApi ? 'Enviando…' : 'Enviar'}
-              </Button>
-            </div>
+      <p className="form-message">
+        Ambiente de testes · As ações alteram as mesas reais desta unidade. Para
+        uma experiência isolada, use a{" "}
+        <Link href="/demo" className="underline">
+          demo interativa
+        </Link>
+        .
+      </p>
+      {(message || error) && (
+        <p role="alert" className="form-error">
+          {message || error}
+        </p>
+      )}
+      <div className="simulator-layout">
+        <section className="surface">
+          <div className="section-heading">
+            <h2>Simulador de mesas</h2>
+            <span className="text-xs text-muted-foreground">
+              {tables.length} mesas
+            </span>
           </div>
-          {apiResponse ? (
-            <pre className="p-3 rounded-lg bg-espresso text-white font-mono text-xs overflow-x-auto">
-              {apiResponse}
-            </pre>
-          ) : null}
-        </div>
-      </Card>
+          <div className="simulator-grid">
+            {tables.map((t) => (
+              <article className="simulator-card" key={t.id}>
+                <div className="simulator-card-head">
+                  <div className="simulator-mini" data-status={t.status}>
+                    {t.number}
+                  </div>
+                  <div>
+                    <h3>Mesa {t.number}</h3>
+                    <p>{TABLE_STATUS_CONFIG[t.status].label}</p>
+                  </div>
+                </div>
+                <div className="simulator-actions">
+                  {(
+                    [
+                      ["RESET", "Normal"],
+                      ["CALL", "Chamar"],
+                      ["DO_NOT_DISTURB", "Não incomodar"],
+                      ["RESET", "Resetar"],
+                    ] as const
+                  ).map(([event, label], index) => (
+                    <button
+                      key={index}
+                      disabled={!!busy}
+                      onClick={() => void trigger(t.id, event)}
+                      aria-label={`${label} mesa ${t.number}`}
+                    >
+                      {busy === t.id ? "…" : label}
+                    </button>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+        <aside className="simulator-side">
+          <section className="surface">
+            <h2>Eventos desta sessão</h2>
+            {events.length ? (
+              <ul className="event-list">
+                {events.map((e, i) => (
+                  <li key={i}>
+                    <span>{e.text}</span>
+                    <time>{e.time}</time>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-6">Os sinais enviados aparecerão aqui.</p>
+            )}
+          </section>
+          <section className="surface">
+            <h2>Fluxo da integração</h2>
+            <div className="integration-flow">
+              <span>Mesa</span>
+              <span>→</span>
+              <span>Sistema</span>
+              <span>→</span>
+              <span>Garçom</span>
+            </div>
+            <p>
+              O simulador e o ESP32 usam o mesmo serviço de eventos. O chamado
+              aparece em tempo real, é assumido por uma pessoa e concluído ao
+              finalizar o atendimento.
+            </p>
+            <Link href="/settings" className="action-outline mt-5">
+              Configurar dispositivos
+            </Link>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }

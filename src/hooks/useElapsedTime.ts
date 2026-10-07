@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { formatElapsedTime } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import { formatElapsedTime } from "@/lib/utils";
 
 export function useElapsedTime(requestedAt: string | null | undefined) {
-  const [elapsed, setElapsed] = useState<string>('00:00');
+  const [elapsed, setElapsed] = useState<string>("00:00");
   const [seconds, setSeconds] = useState<number>(0);
 
   useEffect(() => {
     if (!requestedAt) {
-      setElapsed('00:00');
+      setElapsed("00:00");
       setSeconds(0);
       return;
     }

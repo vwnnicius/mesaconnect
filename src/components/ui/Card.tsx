@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   hoverEffect?: boolean;
@@ -14,9 +14,10 @@ export function Card({
   return (
     <div
       className={cn(
-        'bg-card border border-border rounded-box p-5 md:p-6 shadow-card',
-        hoverEffect && 'transition-colors hover:border-stone-400/70 dark:hover:border-stone-600',
-        className
+        "bg-card border border-border rounded-box p-5 md:p-6 shadow-card",
+        hoverEffect &&
+          "transition-colors hover:border-stone-400/70 dark:hover:border-stone-600",
+        className,
       )}
       {...props}
     >
@@ -33,8 +34,8 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'flex items-center justify-between pb-3 mb-3 border-b border-border',
-        className
+        "flex items-center justify-between pb-3 mb-3 border-b border-border",
+        className,
       )}
       {...props}
     >
@@ -51,8 +52,8 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        'text-sm font-semibold text-stone-900 dark:text-stone-100 tracking-tight',
-        className
+        "text-sm font-semibold text-stone-900 dark:text-stone-100 tracking-tight",
+        className,
       )}
       {...props}
     >

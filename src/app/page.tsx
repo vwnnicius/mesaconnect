@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
-import { BrandMark } from '@/components/layout/BrandMark';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { BrandMark } from "@/components/layout/BrandMark";
 
 export default function RootPage() {
   const router = useRouter();
@@ -11,7 +11,7 @@ export default function RootPage() {
   useEffect(() => {
     async function checkAuth() {
       if (!isSupabaseConfigured()) {
-        router.replace('/dashboard');
+        router.replace("/dashboard");
         return;
       }
 
@@ -19,9 +19,9 @@ export default function RootPage() {
       const { data } = await supabase.auth.getSession();
 
       if (data.session) {
-        router.replace('/dashboard');
+        router.replace("/dashboard");
       } else {
-        router.replace('/login');
+        router.replace("/login");
       }
     }
 
@@ -31,7 +31,9 @@ export default function RootPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream dark:bg-background">
       <BrandMark className="w-11 h-11 mb-4" />
-      <p className="text-sm font-medium text-stone-800 dark:text-stone-100">MesaConnect</p>
+      <p className="text-sm font-medium text-stone-800 dark:text-stone-100">
+        MesaConnect
+      </p>
       <p className="text-sm text-stone-500 mt-1">Abrindo o painel…</p>
     </div>
   );

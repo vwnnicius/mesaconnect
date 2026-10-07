@@ -1,31 +1,59 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BellRing, Grid3X3, Menu } from 'lucide-react';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { useCalls } from '@/hooks/useCalls';
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, BellRing, Grid3X3, Menu } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useCalls } from "@/hooks/useCalls";
+import { useWorkspace } from "@/providers/WorkspaceProvider";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { manager } = useWorkspace();
   const [moreOpen, setMoreOpen] = useState(false);
   const { calls } = useCalls();
-  const callingCount = calls.filter((c) => c.status === 'CALLING').length;
+  const callingCount = calls.filter((c) => c.status === "CALLING").length;
 
   const items = [
-    { name: 'Chamados', href: '/calls', icon: BellRing, badge: callingCount },
-    { name: 'Salão', href: '/tables', icon: Grid3X3 },
-    { name: 'Painel', href: '/dashboard', icon: LayoutDashboard },
+    { name: "Chamados", href: "/calls", icon: BellRing, badge: callingCount },
+    { name: "Salão", href: "/tables", icon: Grid3X3 },
+    { name: "Painel", href: "/dashboard", icon: LayoutDashboard },
   ];
 
   return (
-    <nav aria-label="Navegação no celular" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur-md border-t border-border pb-safe">
+    <nav
+      aria-label="Navegação no celular"
+      className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur-md border-t border-border pb-safe"
+    >
       {moreOpen ? (
-        <div className="border-b border-border p-3 grid grid-cols-2 gap-2" aria-label="Mais páginas">
-          {[['Demo interativa', '/demo'], ['Desempenho', '/analytics'], ['Avaliações', '/evaluations'], ['Simulador', '/simulator'], ['Configurações', '/settings'], ['Login', '/login']].map(([name, href]) => (
-            <Link key={href} href={href} onClick={() => setMoreOpen(false)} className="rounded-lg px-4 py-3 text-sm hover:bg-background" aria-current={pathname === href ? 'page' : undefined}>{name}</Link>
+        <div
+          className="border-b border-border p-3 grid grid-cols-2 gap-2"
+          aria-label="Mais páginas"
+        >
+          {[
+            ["Demo interativa", "/demo"],
+            ["Seu perfil", "/profile"],
+            ...(manager
+              ? [
+                  ["Relatórios", "/analytics"],
+                  ["Avaliações", "/evaluations"],
+                  ["Simulador", "/simulator"],
+                  ["Configurações", "/settings"],
+                ]
+              : []),
+            ["Login", "/login"],
+          ].map(([name, href]) => (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setMoreOpen(false)}
+              className="rounded-lg px-4 py-3 text-sm hover:bg-background"
+              aria-current={pathname === href ? "page" : undefined}
+            >
+              {name}
+            </Link>
           ))}
         </div>
       ) : null}
@@ -39,10 +67,10 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               onClick={() => setMoreOpen(false)}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-0.5 select-none',
-                isActive ? 'text-accent' : 'text-muted-foreground'
+                "relative flex flex-col items-center justify-center gap-0.5 select-none",
+                isActive ? "text-accent" : "text-muted-foreground",
               )}
             >
               <div className="relative">
@@ -57,7 +85,12 @@ export function MobileNav() {
             </Link>
           );
         })}
-        <button type="button" aria-expanded={moreOpen} onClick={() => setMoreOpen(!moreOpen)} className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground">
+        <button
+          type="button"
+          aria-expanded={moreOpen}
+          onClick={() => setMoreOpen(!moreOpen)}
+          className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground"
+        >
           <Menu className="w-5 h-5" />
           <span className="text-[10px] font-medium">Mais</span>
         </button>

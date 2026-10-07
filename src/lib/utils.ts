@@ -31,7 +31,9 @@ export function formatSecondsToTime(totalSeconds: number): string {
 }
 
 export function formatRelativeTime(isoDate: string): string {
-  const diffSeconds = Math.floor((Date.now() - new Date(isoDate).getTime()) / 1000);
+  const diffSeconds = Math.floor(
+    (Date.now() - new Date(isoDate).getTime()) / 1000,
+  );
   if (diffSeconds < 60) return `há ${Math.max(1, diffSeconds)}s`;
   const diffMinutes = Math.floor(diffSeconds / 60);
   if (diffMinutes < 60) return `há ${diffMinutes} min`;

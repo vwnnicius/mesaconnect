@@ -1,139 +1,189 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Star, CheckCircle, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { createEvaluation } from '@/services/evaluationsService';
-import { RESTAURANT_DEMO } from '@/lib/constants';
-import { BrandMark } from '@/components/layout/BrandMark';
-import { getTableByNumber } from '@/services/tablesService';
-import { Table } from '@/types';
-import { isSupabaseConfigured } from '@/lib/supabase/client';
-
-export default function CustomerEvaluationPage() {
+"use client";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Star, ArrowRight, CheckCircle } from "lucide-react";
+import { BrandMark } from "@/components/layout/BrandMark";
+import { AssetImage } from "@/components/ui/AssetImage";
+import { getTableByNumber } from "@/services/tablesService";
+import { createEvaluation } from "@/services/evaluationsService";
+import { RESTAURANT_DEMO } from "@/lib/constants";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import type { Table } from "@/types";
+type PublicTable = Table & {
+  restaurant_name?: string;
+  logo_path?: string | null;
+  cover_path?: string | null;
+};
+export default function CustomerEvaluation() {
   const params = useParams();
-  const tableParam = (params?.table as string) || '07';
-  const tableNumber = tableParam.padStart(2, '0');
-  const restaurantSlug = String(params?.restaurant || '');
-  const [table, setTable] = useState<Table | null>(null);
-  const [resolving, setResolving] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  const slug = String(params.restaurant || "");
+  const number = String(params.table || "").padStart(2, "0");
+  const [table, setTable] = useState<PublicTable | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
-    setResolving(true);
-    getTableByNumber(restaurantSlug, tableNumber)
-      .then((value) => { if (active) setTable(value); })
-      .catch(() => { if (active) setTable(null); })
-      .finally(() => { if (active) setResolving(false); });
-    return () => { active = false; };
-  }, [restaurantSlug, tableNumber]);
-
-  const [rating, setRating] = useState<number>(5);
-  const [hoverRating, setHoverRating] = useState<number | null>(null);
-  const [comment, setComment] = useState<string>('');
-  const [submitted, setSubmitted] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!table) return;
     setLoading(true);
-    setError(null);
-
-    try {
-      await createEvaluation({
-        restaurantId: table.restaurant_id,
-        tableId: table.id,
-        tableNumber: tableNumber,
-        rating,
-        comment: comment.trim() || null,
+    setSent(false);
+    getTableByNumber(slug, number)
+      .then((t) => {
+        if (active) setTable(t);
+      })
+      .catch(() => {
+        if (active) setTable(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
-      setSubmitted(true);
-    } catch (err) {
-      console.error('Erro ao enviar avaliação:', err);
-      setError('Não foi possível enviar sua avaliação. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    return () => {
+      active = false;
+    };
+  }, [slug, number]);
   return (
-    <div className="min-h-screen bg-cream dark:bg-background flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <BrandMark className="w-10 h-10 mx-auto mb-3" />
-          <h1 className="text-lg font-semibold tracking-tight">{restaurantSlug === RESTAURANT_DEMO.slug ? RESTAURANT_DEMO.name : 'Avalie o atendimento'}</h1>
-          <p className="text-xs text-stone-500 mt-1">Mesa {tableNumber}</p>
-        </div>
-
-        <div className="bg-cream-paper dark:bg-card border border-border rounded-box p-6 shadow-card">
-          {resolving ? <p role="status" className="text-center text-sm text-muted-foreground py-6">Abrindo sua mesa…</p> : !table ? <p role="alert" className="text-center text-sm text-muted-foreground py-6">Esta mesa não está disponível. Verifique o QR Code com a equipe.</p> : submitted ? (
-            <div className="py-6 text-center space-y-3">
-              <CheckCircle className="w-10 h-10 mx-auto text-emerald-700" />
-              <h2 className="text-lg font-semibold">Obrigado</h2>
-              <p className="text-sm text-stone-500 leading-relaxed">
-                {isSupabaseConfigured() ? 'Sua avaliação foi enviada. Obrigado por compartilhar sua experiência.' : 'Avaliação registrada nesta demonstração local.'}
-              </p>
-            </div>
+    <main className="customer-evaluation">
+      <section className="customer-panel">
+        {table?.cover_path && (
+          <AssetImage
+            kind="cover"
+            path={table.cover_path}
+            name={table.restaurant_name}
+            className="customer-cover"
+          />
+        )}
+        <div className="customer-brand">
+          {table?.logo_path ? (
+            <AssetImage
+              kind="logo"
+              path={table.logo_path}
+              name={table.restaurant_name}
+            />
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="text-center">
-                <h2 className="text-base font-semibold">Como foi o atendimento?</h2>
-                <p className="text-xs text-stone-400 mt-1">Toque nas estrelas</p>
-              </div>
-
-              <div className="flex justify-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => {
-                  const active = (hoverRating ?? rating) >= star;
-                  return (
+            <BrandMark />
+          )}
+          <span>MesaConnect</span>
+        </div>
+        {loading ? (
+          <p role="status">Abrindo sua mesa…</p>
+        ) : !table ? (
+          <p role="alert">
+            Esta mesa não está disponível. Confira o QR Code com a equipe.
+          </p>
+        ) : sent ? (
+          <div className="text-center py-8">
+            <CheckCircle className="mx-auto text-accent mb-6" size={48} />
+            <h1>Obrigado pelo carinho.</h1>
+            <p className="customer-description">
+              {isSupabaseConfigured()
+                ? "Sua avaliação foi enviada para a equipe."
+                : "Avaliação registrada nesta demonstração."}
+            </p>
+          </div>
+        ) : (
+          <>
+            <p className="customer-context">
+              Mesa {number} · {table.restaurant_name || RESTAURANT_DEMO.name}
+            </p>
+            <h1>
+              Como foi seu
+              <br />
+              atendimento?
+            </h1>
+            <p className="customer-description">
+              Sua opinião nos ajuda a oferecer
+              <br />
+              uma experiência cada vez melhor.
+            </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!rating) return;
+                setBusy(true);
+                setError("");
+                try {
+                  await createEvaluation({
+                    restaurantId: table.restaurant_id,
+                    tableId: table.id,
+                    rating,
+                    comment: comment.trim(),
+                    tableNumber: number,
+                  });
+                  setSent(true);
+                } catch {
+                  setError(
+                    "Não foi possível enviar. Tente novamente em alguns instantes.",
+                  );
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              <div className="customer-stars">
+                <div role="group" aria-label="Escolha sua avaliação">
+                  {[1, 2, 3, 4, 5].map((n) => (
                     <button
+                      key={n}
                       type="button"
-                      key={star}
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(null)}
-                      aria-label={`${star} ${star === 1 ? 'estrela' : 'estrelas'}`}
-                      aria-pressed={rating === star}
-                      className="p-2 rounded-lg"
+                      aria-label={`${n} ${n === 1 ? "estrela" : "estrelas"}`}
+                      aria-pressed={rating === n}
+                      onClick={() => setRating(n)}
+                      onMouseEnter={() => setHover(n)}
+                      onMouseLeave={() => setHover(0)}
                     >
                       <Star
-                        className={`w-8 h-8 ${
-                          active
-                            ? 'text-orange-500 fill-orange-500'
-                            : 'text-stone-300 dark:text-stone-700'
-                        }`}
+                        color={(hover || rating) >= n ? "#eab235" : "#dfe1e2"}
+                        fill={(hover || rating) >= n ? "#eab235" : "#dfe1e2"}
+                        strokeWidth={1.3}
                       />
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
+                <p>
+                  {
+                    [
+                      "Toque nas estrelas",
+                      "Precisa melhorar",
+                      "Regular",
+                      "Bom",
+                      "Muito bom",
+                      "Excelente",
+                    ][rating]
+                  }
+                </p>
               </div>
-
-              <div>
-                <label htmlFor="evaluation-comment" className="block text-xs font-medium text-stone-600 mb-1.5">
-                  Comentário (opcional)
-                </label>
+              <label className="customer-comment">
+                Conte mais sobre sua experiência{" "}
+                <span className="text-muted-foreground">(opcional)</span>
                 <textarea
-                  id="evaluation-comment"
-                  maxLength={1000}
+                  maxLength={500}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Comida no ponto? Garçom rápido?"
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-cream dark:bg-stone-900 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  placeholder="O que você mais gostou? Há algo que podemos melhorar?"
                 />
-              </div>
-              {error ? <p role="alert" className="text-sm text-red-700 dark:text-red-400">{error}</p> : null}
-
-              <Button type="submit" disabled={loading} fullWidth size="lg">
-                {loading ? 'Enviando…' : 'Enviar'}
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+                <small>{comment.length}/500</small>
+              </label>
+              {error && (
+                <p role="alert" className="form-error mb-4">
+                  {error}
+                </p>
+              )}
+              <button className="action-solid" disabled={busy || !rating}>
+                {busy ? "Enviando…" : "Enviar avaliação"}
+                <ArrowRight size={19} />
+              </button>
             </form>
-          )}
-        </div>
-      </div>
-    </div>
+          </>
+        )}
+        <p className="customer-thanks">
+          Obrigado por dedicar alguns segundos
+          <br />
+          para compartilhar sua experiência.
+        </p>
+      </section>
+    </main>
   );
 }
