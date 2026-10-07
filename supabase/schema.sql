@@ -173,20 +173,38 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
     default_rest_id UUID;
+    user_name TEXT;
 BEGIN
-    SELECT id INTO default_rest_id FROM public.restaurants WHERE slug = 'sabor-grill' LIMIT 1;
-    
+    -- Busca o restaurante demo como padrão
+    SELECT id INTO default_rest_id
+    FROM public.restaurants
+    WHERE slug = 'sabor-grill'
+    LIMIT 1;
+
+    -- Garante que o nome nunca seja nulo ou vazio
+    user_name := COALESCE(
+        NULLIF(TRIM(NEW.raw_user_meta_data->>'name'), ''),
+        NULLIF(TRIM(split_part(NEW.email, '@', 1)), ''),
+        'Usuário'
+    );
+
     INSERT INTO public.profiles (id, restaurant_id, name, role)
     VALUES (
         NEW.id,
         COALESCE((NEW.raw_user_meta_data->>'restaurant_id')::uuid, default_rest_id),
-        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+        user_name,
         COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'WAITER')
     )
     ON CONFLICT (id) DO NOTHING;
+
     RETURN NEW;
+EXCEPTION
+    -- Nunca deixa o erro do trigger bloquear a criação do usuário
+    WHEN OTHERS THEN
+        RAISE WARNING 'handle_new_user falhou para %: %', NEW.id, SQLERRM;
+        RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -233,6 +251,12 @@ CREATE POLICY "Usuário pode atualizar seu próprio perfil"
 ON public.profiles FOR UPDATE
 TO authenticated
 USING (id = auth.uid());
+
+DROP POLICY IF EXISTS "Sistema insere perfil no registro do usuário" ON public.profiles;
+CREATE POLICY "Sistema insere perfil no registro do usuário"
+ON public.profiles FOR INSERT
+TO authenticated
+WITH CHECK (id = auth.uid());
 
 -- POLÍTICAS: MESAS
 DROP POLICY IF EXISTS "Funcionários visualizam mesas do restaurante" ON public.tables;
