@@ -123,9 +123,18 @@ CREATE INDEX IF NOT EXISTS idx_evaluations_restaurant ON public.evaluations(rest
 CREATE INDEX IF NOT EXISTS idx_devices_uid ON public.devices(device_uid);
 
 -- 5. CONFIGURAÇÃO DE SUPABASE REALTIME
--- Habilita escuta em tempo real nas tabelas de mesas e chamados
-ALTER PUBLICATION supabase_realtime ADD TABLE public.tables;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.service_calls;
+-- Habilita escuta em tempo real nas tabelas de mesas e chamados (idempotente)
+DO $$ BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.tables;
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.service_calls;
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- 6. TRIGGER PARA SINCRONIZAÇÃO AUTOMÁTICA DO STATUS DA MESA
 CREATE OR REPLACE FUNCTION public.sync_table_status_from_call()
@@ -165,7 +174,6 @@ RETURNS TRIGGER AS $$
 DECLARE
     default_rest_id UUID;
 BEGIN
-    -- Seleciona restaurante de demonstração padrão se nenhum informado
     SELECT id INTO default_rest_id FROM public.restaurants WHERE slug = 'sabor-grill' LIMIT 1;
     
     INSERT INTO public.profiles (id, restaurant_id, name, role)
@@ -201,103 +209,121 @@ RETURNS UUID AS $$
 $$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- POLÍTICAS: RESTAURANTES
+DROP POLICY IF EXISTS "Visualização de restaurante pelos funcionários" ON public.restaurants;
 CREATE POLICY "Visualização de restaurante pelos funcionários"
 ON public.restaurants FOR SELECT
 TO authenticated
 USING (id = public.current_user_restaurant_id());
 
+DROP POLICY IF EXISTS "Visualização pública de dados básicos do restaurante (para QR Code)" ON public.restaurants;
 CREATE POLICY "Visualização pública de dados básicos do restaurante (para QR Code)"
 ON public.restaurants FOR SELECT
 TO anon
 USING (true);
 
 -- POLÍTICAS: PERFIS
+DROP POLICY IF EXISTS "Usuário pode visualizar perfis do mesmo restaurante" ON public.profiles;
 CREATE POLICY "Usuário pode visualizar perfis do mesmo restaurante"
 ON public.profiles FOR SELECT
 TO authenticated
 USING (restaurant_id = public.current_user_restaurant_id());
 
+DROP POLICY IF EXISTS "Usuário pode atualizar seu próprio perfil" ON public.profiles;
 CREATE POLICY "Usuário pode atualizar seu próprio perfil"
 ON public.profiles FOR UPDATE
 TO authenticated
 USING (id = auth.uid());
 
 -- POLÍTICAS: MESAS
+DROP POLICY IF EXISTS "Funcionários visualizam mesas do restaurante" ON public.tables;
 CREATE POLICY "Funcionários visualizam mesas do restaurante"
 ON public.tables FOR SELECT
 TO authenticated
 USING (restaurant_id = public.current_user_restaurant_id());
 
+DROP POLICY IF EXISTS "Leitura pública de mesas para tela de QR Code" ON public.tables;
 CREATE POLICY "Leitura pública de mesas para tela de QR Code"
 ON public.tables FOR SELECT
 TO anon
 USING (true);
 
+DROP POLICY IF EXISTS "Gerência/Sistema atualiza status de mesas" ON public.tables;
 CREATE POLICY "Gerência/Sistema atualiza status de mesas"
 ON public.tables FOR ALL
 TO authenticated
 USING (restaurant_id = public.current_user_restaurant_id());
 
--- Permitir também atualização de mesas para o simulador em modo anon/dev se necessário
+DROP POLICY IF EXISTS "Permitir atualização de mesa pelo simulador" ON public.tables;
 CREATE POLICY "Permitir atualização de mesa pelo simulador"
 ON public.tables FOR UPDATE
 TO anon
 USING (true);
 
 -- POLÍTICAS: CHAMADOS (SERVICE_CALLS)
+DROP POLICY IF EXISTS "Funcionários gerenciam chamados do restaurante" ON public.service_calls;
 CREATE POLICY "Funcionários gerenciam chamados do restaurante"
 ON public.service_calls FOR ALL
 TO authenticated
 USING (restaurant_id = public.current_user_restaurant_id());
 
+DROP POLICY IF EXISTS "Simulador e Botão criam chamados" ON public.service_calls;
 CREATE POLICY "Simulador e Botão criam chamados"
 ON public.service_calls FOR INSERT
 TO anon
 WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Simulador atualiza chamados" ON public.service_calls;
 CREATE POLICY "Simulador atualiza chamados"
 ON public.service_calls FOR UPDATE
 TO anon
 USING (true);
 
+DROP POLICY IF EXISTS "Leitura pública de chamados ativos pelo simulador" ON public.service_calls;
 CREATE POLICY "Leitura pública de chamados ativos pelo simulador"
 ON public.service_calls FOR SELECT
 TO anon
 USING (true);
 
 -- POLÍTICAS: AVALIAÇÕES (EVALUATIONS)
+DROP POLICY IF EXISTS "Clientes anônimos inserem avaliações via QR Code" ON public.evaluations;
 CREATE POLICY "Clientes anônimos inserem avaliações via QR Code"
 ON public.evaluations FOR INSERT
 TO anon
 WITH CHECK (rating >= 1 AND rating <= 5);
 
+DROP POLICY IF EXISTS "Funcionários visualizam avaliações do restaurante" ON public.evaluations;
 CREATE POLICY "Funcionários visualizam avaliações do restaurante"
 ON public.evaluations FOR SELECT
 TO authenticated
 USING (restaurant_id = public.current_user_restaurant_id());
 
+DROP POLICY IF EXISTS "Visualização pública de avaliações pelo simulador" ON public.evaluations;
 CREATE POLICY "Visualização pública de avaliações pelo simulador"
 ON public.evaluations FOR SELECT
 TO anon
 USING (true);
 
 -- POLÍTICAS: DISPOSITIVOS
+DROP POLICY IF EXISTS "Funcionários visualizam dispositivos do restaurante" ON public.devices;
 CREATE POLICY "Funcionários visualizam dispositivos do restaurante"
 ON public.devices FOR ALL
 TO authenticated
 USING (true);
 
+DROP POLICY IF EXISTS "Leitura pública de dispositivos" ON public.devices;
 CREATE POLICY "Leitura pública de dispositivos"
 ON public.devices FOR SELECT
 TO anon
 USING (true);
 
 -- POLÍTICAS: DEVICE_EVENTS
+DROP POLICY IF EXISTS "Inserção pública de eventos pelo ESP32 e Simulador" ON public.device_events;
 CREATE POLICY "Inserção pública de eventos pelo ESP32 e Simulador"
 ON public.device_events FOR INSERT
 TO anon
 WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Funcionários visualizam eventos de telemetria" ON public.device_events;
 CREATE POLICY "Funcionários visualizam eventos de telemetria"
 ON public.device_events FOR SELECT
 TO authenticated
@@ -312,10 +338,7 @@ USING (true);
 DO $$
 DECLARE
     demo_rest_id UUID := '00000000-0000-0000-0000-000000000001'::uuid;
-    t1_id UUID; t2_id UUID; t3_id UUID; t4_id UUID; t5_id UUID;
-    t6_id UUID; t7_id UUID; t8_id UUID; t9_id UUID; t10_id UUID;
-    d1_id UUID; d7_id UUID;
-    c1_id UUID; c2_id UUID; c3_id UUID;
+    t1_id UUID; t2_id UUID; t4_id UUID; t7_id UUID; t8_id UUID;
 BEGIN
     -- 1. Cria restaurante demonstrativo
     INSERT INTO public.restaurants (id, name, slug)
@@ -336,12 +359,12 @@ BEGIN
     (gen_random_uuid(), demo_rest_id, '10', 'OFFLINE')
     ON CONFLICT (restaurant_id, number) DO UPDATE SET status = EXCLUDED.status;
 
-    -- Recupera IDs das mesas criadas
-    SELECT id INTO t4_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '04';
-    SELECT id INTO t7_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '07';
-    SELECT id INTO t8_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '08';
-    SELECT id INTO t1_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '01';
-    SELECT id INTO t2_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '02';
+    -- Recupera IDs das mesas criadas (com LIMIT 1)
+    SELECT id INTO t1_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '01' LIMIT 1;
+    SELECT id INTO t2_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '02' LIMIT 1;
+    SELECT id INTO t4_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '04' LIMIT 1;
+    SELECT id INTO t7_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '07' LIMIT 1;
+    SELECT id INTO t8_id FROM public.tables WHERE restaurant_id = demo_rest_id AND number = '08' LIMIT 1;
 
     -- 3. Cria dispositivos vinculados
     INSERT INTO public.devices (table_id, device_uid, online, last_seen)
@@ -352,7 +375,10 @@ BEGIN
     (t1_id, 'MESA-001-ESP32', true, now())
     ON CONFLICT (device_uid) DO NOTHING;
 
-    -- 4. Cria chamados ativos em tempo real para demonstração imediata
+    -- 4. Limpa chamados anteriores para evitar duplicidade em execuções repetidas
+    DELETE FROM public.service_calls WHERE restaurant_id = demo_rest_id;
+
+    -- 5. Cria chamados ativos em tempo real para demonstração imediata
     -- Chamado Mesa 07: solicitado há 45 segundos (CALLING)
     INSERT INTO public.service_calls (restaurant_id, table_id, requested_at, status)
     VALUES (demo_rest_id, t7_id, now() - INTERVAL '45 seconds', 'CALLING');
@@ -365,16 +391,17 @@ BEGIN
     INSERT INTO public.service_calls (restaurant_id, table_id, requested_at, acknowledged_at, status)
     VALUES (demo_rest_id, t8_id, now() - INTERVAL '180 seconds', now() - INTERVAL '60 seconds', 'ACKNOWLEDGED');
 
-    -- 5. Cria chamados históricos concluídos hoje (para cálculo de estatísticas e gráficos)
-    INSERT INTO public.service_calls (id, restaurant_id, table_id, requested_at, acknowledged_at, completed_at, status)
+    -- 6. Cria chamados históricos concluídos hoje (para cálculo de estatísticas e gráficos)
+    INSERT INTO public.service_calls (restaurant_id, table_id, requested_at, acknowledged_at, completed_at, status)
     VALUES
-    (gen_random_uuid(), demo_rest_id, t1_id, now() - INTERVAL '4 hours', now() - INTERVAL '3 hours 59 minutes', now() - INTERVAL '3 hours 55 minutes', 'COMPLETED'),
-    (gen_random_uuid(), demo_rest_id, t2_id, now() - INTERVAL '3 hours', now() - INTERVAL '2 hours 59 minutes 15 seconds', now() - INTERVAL '2 hours 54 minutes', 'COMPLETED'),
-    (gen_random_uuid(), demo_rest_id, t7_id, now() - INTERVAL '2 hours', now() - INTERVAL '1 hour 59 minutes 10 seconds', now() - INTERVAL '1 hour 53 minutes', 'COMPLETED'),
-    (gen_random_uuid(), demo_rest_id, t4_id, now() - INTERVAL '1 hour', now() - INTERVAL '59 minutes 20 seconds', now() - INTERVAL '55 minutes', 'COMPLETED')
-    RETURNING id INTO c1_id;
+    (demo_rest_id, t1_id, now() - INTERVAL '4 hours', now() - INTERVAL '3 hours 59 minutes', now() - INTERVAL '3 hours 55 minutes', 'COMPLETED'),
+    (demo_rest_id, t2_id, now() - INTERVAL '3 hours', now() - INTERVAL '2 hours 59 minutes 15 seconds', now() - INTERVAL '2 hours 54 minutes', 'COMPLETED'),
+    (demo_rest_id, t7_id, now() - INTERVAL '2 hours', now() - INTERVAL '1 hour 59 minutes 10 seconds', now() - INTERVAL '1 hour 53 minutes', 'COMPLETED'),
+    (demo_rest_id, t4_id, now() - INTERVAL '1 hour', now() - INTERVAL '59 minutes 20 seconds', now() - INTERVAL '55 minutes', 'COMPLETED');
 
-    -- 6. Cria avaliações demonstrativas de clientes
+    -- 7. Limpa e recria avaliações demonstrativas de clientes
+    DELETE FROM public.evaluations WHERE restaurant_id = demo_rest_id;
+
     INSERT INTO public.evaluations (restaurant_id, table_id, rating, comment, created_at)
     VALUES
     (demo_rest_id, t1_id, 5, 'Picanha sensacional e o garçom chegou em menos de 1 minuto!', now() - INTERVAL '3 hours 50 minutes'),
