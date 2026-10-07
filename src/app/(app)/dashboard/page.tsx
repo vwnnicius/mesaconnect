@@ -2,21 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  Bell,
-  Clock,
-  Star,
-  CheckCircle,
-  TrendingUp,
-  ArrowRight,
-  Flame,
-  Cpu,
-  Grid3X3,
-} from 'lucide-react';
+import { Bell, Clock, Star, CheckCircle, ArrowRight, Grid3X3 } from 'lucide-react';
 import { StatCard } from '@/components/analytics/StatCard';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusDot } from '@/components/ui/StatusDot';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { useCalls } from '@/hooks/useCalls';
 import { useTables } from '@/hooks/useTables';
 import {
@@ -42,128 +33,101 @@ export default function DashboardPage() {
   const inServiceCallsCount = calls.filter((c) => c.status === 'ACKNOWLEDGED').length;
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2 border-b border-zinc-200/80 dark:border-zinc-800">
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            Resumo Operacional de Hoje
-          </span>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-            {greeting}, João 👋
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Painel em tempo real para acompanhamento de SLA e ritmo do rodízio.
-          </p>
-        </div>
+    <div className="space-y-7">
+      <PageHeader
+        kicker="Hoje no salão"
+        title={`${greeting}, João`}
+        description="Fila de atendimento, mapa das mesas e tempo de resposta da equipe."
+        actions={
+          <>
+            <Link href="/calls">
+              <Button size="md" variant="accent">
+                <Bell className="w-4 h-4" />
+                Chamados ({openCallsCount})
+              </Button>
+            </Link>
+            <Link href="/simulator">
+              <Button size="md" variant="outline">
+                Simular botão
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-        <div className="flex items-center gap-2.5">
-          <Link href="/calls">
-            <Button size="md" className="bg-amber-500 hover:bg-amber-600 text-white font-semibold">
-              <Bell className="w-4 h-4 mr-2" />
-              Ver Chamados ({openCallsCount})
-            </Button>
-          </Link>
-          <Link href="/simulator">
-            <Button size="md" variant="outline" className="border-dashed">
-              <Cpu className="w-4 h-4 mr-2 text-amber-500" />
-              Simular ESP32
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <StatCard
-          title="Chamados em Aberto"
+          title="Chamados em aberto"
           value={openCallsCount}
-          subtitle={`${inServiceCallsCount} mesas em atendimento`}
+          subtitle={`${inServiceCallsCount} em atendimento`}
           highlight={openCallsCount > 0}
-          icon={<Bell className="w-5 h-5 text-amber-500" />}
+          icon={<Bell className="w-4 h-4 text-orange-700" />}
         />
-
         <StatCard
-          title="Tempo Médio Resposta"
+          title="Tempo médio de resposta"
           value={formatSecondsToTime(DEMO_DASHBOARD_METRICS.avgResponseTimeSeconds)}
-          subtitle={`Mediana: ${formatSecondsToTime(DEMO_DASHBOARD_METRICS.medianResponseTimeSeconds)}`}
-          trend="-18s vs semana passada"
-          trendPositive={true}
-          icon={<Clock className="w-5 h-5 text-blue-500" />}
+          subtitle={`Mediana ${formatSecondsToTime(DEMO_DASHBOARD_METRICS.medianResponseTimeSeconds)}`}
+          trend="−18s vs. semana passada"
+          trendPositive
+          icon={<Clock className="w-4 h-4 text-blue-700" />}
         />
-
         <StatCard
-          title="Total de Chamados Hoje"
+          title="Chamados hoje"
           value={DEMO_DASHBOARD_METRICS.totalCallsToday}
-          subtitle="98.4% atendidos dentro do SLA"
-          icon={<CheckCircle className="w-5 h-5 text-emerald-500" />}
+          subtitle="98% dentro do SLA"
+          icon={<CheckCircle className="w-4 h-4 text-emerald-700" />}
         />
-
         <StatCard
-          title="Avaliação Média Clientes"
-          value={`${DEMO_DASHBOARD_METRICS.avgRating} ★`}
-          subtitle={`${DEMO_DASHBOARD_METRICS.totalEvaluations} avaliações via QR Code`}
-          trend="+0.2 NPS"
-          trendPositive={true}
-          icon={<Star className="w-5 h-5 text-amber-400" />}
+          title="Nota média"
+          value={DEMO_DASHBOARD_METRICS.avgRating}
+          subtitle={`${DEMO_DASHBOARD_METRICS.totalEvaluations} avaliações`}
+          trend="+0,2"
+          trendPositive
+          icon={<Star className="w-4 h-4 text-orange-600" />}
         />
       </div>
 
-      {/* Realtime Attention Status & Active Tables Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Mesas com Chamados Ativos */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2">
           <CardHeader>
             <div className="flex items-center justify-between w-full">
-              <CardTitle className="flex items-center gap-2">
-                <Flame className="w-4 h-4 text-amber-500" />
-                Fila de Atendimento Imediato
-              </CardTitle>
+              <CardTitle>Fila imediata</CardTitle>
               <Link
                 href="/calls"
-                className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 inline-flex items-center gap-1"
+                className="text-xs font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 inline-flex items-center gap-1"
               >
-                Abrir tela inteira <ArrowRight className="w-3.5 h-3.5" />
+                Abrir fila <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </CardHeader>
 
           {calls.length === 0 ? (
-            <div className="py-12 text-center text-zinc-400">
-              <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
-              <p className="text-sm font-medium">Nenhum chamado pendente no momento!</p>
-              <p className="text-xs mt-1">Todos os clientes foram atendidos.</p>
+            <div className="py-10 text-center text-stone-500">
+              <p className="text-sm font-medium text-stone-800 dark:text-stone-200">
+                Nenhuma mesa esperando
+              </p>
+              <p className="text-xs mt-1">Quando um botão for acionado, o chamado aparece aqui.</p>
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {calls.slice(0, 4).map((call) => (
                 <div
                   key={call.id}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-zinc-100/60 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-cream/60 dark:bg-black/20"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center font-black text-sm">
+                    <div className="w-9 h-9 rounded-lg bg-espresso text-cream flex items-center justify-center text-sm font-semibold tabular-nums">
                       {call.table_number}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                        Mesa {call.table_number}
-                      </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-sm font-medium">Mesa {call.table_number}</p>
+                      <p className="text-xs text-stone-500">
                         {call.status === 'CALLING' ? 'Aguardando garçom' : 'Em atendimento'}
                       </p>
                     </div>
                   </div>
-
                   <Link href="/calls">
-                    <Button
-                      size="sm"
-                      className={
-                        call.status === 'CALLING'
-                          ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                          : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                      }
-                    >
+                    <Button size="sm" variant={call.status === 'CALLING' ? 'accent' : 'success'}>
                       {call.status === 'CALLING' ? 'Atender' : 'Concluir'}
                     </Button>
                   </Link>
@@ -173,54 +137,48 @@ export default function DashboardPage() {
           )}
         </Card>
 
-        {/* Mini Mapa de Mesas */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between w-full">
               <CardTitle className="flex items-center gap-2">
-                <Grid3X3 className="w-4 h-4 text-zinc-500" />
-                Mapa do Salão
+                <Grid3X3 className="w-4 h-4 text-stone-400" />
+                Mapa
               </CardTitle>
-              <Link
-                href="/tables"
-                className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-              >
-                Ver todas ({tables.length})
+              <Link href="/tables" className="text-xs font-medium text-stone-500 hover:text-stone-800">
+                {tables.length} mesas
               </Link>
             </div>
           </CardHeader>
 
-          <div className="grid grid-cols-5 gap-2 pt-1">
+          <div className="grid grid-cols-5 gap-1.5">
             {tables.map((table) => (
               <Link
                 key={table.id}
                 href="/tables"
-                className="flex flex-col items-center justify-center p-2 rounded-xl border border-zinc-200/80 dark:border-zinc-800 hover:scale-105 transition-all text-center"
+                className="flex flex-col items-center justify-center py-2 rounded-lg border border-border hover:border-stone-400 transition-colors"
               >
-                <span className="text-xs font-black text-zinc-800 dark:text-zinc-200">
-                  {table.number}
-                </span>
+                <span className="text-[11px] font-semibold tabular-nums">{table.number}</span>
                 <StatusDot status={table.status} showText={false} size="sm" className="mt-1" />
               </Link>
             ))}
           </div>
 
-          <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-zinc-500 space-y-1">
+          <div className="mt-4 pt-3 border-t border-border text-[11px] text-stone-500 space-y-1">
             <div className="flex justify-between">
-              <span>🟢 Disponíveis</span>
-              <span className="font-semibold">
+              <span>Disponíveis</span>
+              <span className="tabular-nums font-medium text-stone-700 dark:text-stone-300">
                 {tables.filter((t) => t.status === 'AVAILABLE').length}
               </span>
             </div>
             <div className="flex justify-between">
-              <span>🟡 Chamando</span>
-              <span className="font-semibold text-amber-600">
+              <span>Chamando</span>
+              <span className="tabular-nums font-medium text-orange-700">
                 {tables.filter((t) => t.status === 'CALLING').length}
               </span>
             </div>
             <div className="flex justify-between">
-              <span>🔵 Em Atendimento</span>
-              <span className="font-semibold text-blue-600">
+              <span>Em atendimento</span>
+              <span className="tabular-nums font-medium text-blue-700">
                 {tables.filter((t) => t.status === 'ACKNOWLEDGED').length}
               </span>
             </div>
@@ -228,68 +186,51 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Gráficos de Chamados por Hora e Mesas com Maior Movimento */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Gráfico Chamados por Hora */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-zinc-500" />
-              Volume de Chamados por Horário
-            </CardTitle>
+            <CardTitle>Volume por horário</CardTitle>
           </CardHeader>
-          <div className="pt-4">
-            <div className="h-44 flex items-end gap-3 px-2">
-              {DEMO_HOURLY_CALLS.map((item) => {
-                const max = Math.max(...DEMO_HOURLY_CALLS.map((h) => h.calls));
-                const heightPercent = Math.round((item.calls / max) * 100);
-                return (
-                  <div key={item.hour} className="flex-1 flex flex-col items-center gap-2">
-                    <span className="text-[10px] font-mono font-semibold text-zinc-500">
-                      {item.calls}
-                    </span>
-                    <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-t-lg h-32 flex items-end">
-                      <div
-                        style={{ height: `${heightPercent}%` }}
-                        className="w-full bg-zinc-900 dark:bg-zinc-100 rounded-t-lg transition-all"
-                      />
-                    </div>
-                    <span className="text-[10px] font-mono text-zinc-400">
-                      {item.hour}
-                    </span>
+          <div className="h-40 flex items-end gap-2.5 px-1">
+            {DEMO_HOURLY_CALLS.map((item) => {
+              const max = Math.max(...DEMO_HOURLY_CALLS.map((h) => h.calls));
+              const heightPercent = Math.round((item.calls / max) * 100);
+              return (
+                <div key={item.hour} className="flex-1 flex flex-col items-center gap-1.5">
+                  <span className="text-[10px] font-mono tabular-nums text-stone-500">
+                    {item.calls}
+                  </span>
+                  <div className="w-full bg-cream dark:bg-stone-800 rounded-t h-28 flex items-end">
+                    <div
+                      style={{ height: `${heightPercent}%` }}
+                      className="w-full bg-espresso dark:bg-cream rounded-t"
+                    />
                   </div>
-                );
-              })}
-            </div>
+                  <span className="text-[10px] font-mono text-stone-400">{item.hour}</span>
+                </div>
+              );
+            })}
           </div>
         </Card>
 
-        {/* Mesas Mais Demandadas */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-amber-500" />
-              Mesas com Mais Chamados
-            </CardTitle>
+            <CardTitle>Mesas com mais chamados</CardTitle>
           </CardHeader>
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3">
             {DEMO_CALLS_BY_TABLE.slice(0, 5).map((t, idx) => {
               const max = DEMO_CALLS_BY_TABLE[0].calls;
               const pct = Math.round((t.calls / max) * 100);
               return (
                 <div key={t.tableNumber} className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-zinc-800 dark:text-zinc-200">
-                      Mesa {t.tableNumber}
-                    </span>
-                    <span className="font-mono text-zinc-500">{t.calls} chamados</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="font-medium">Mesa {t.tableNumber}</span>
+                    <span className="font-mono tabular-nums text-stone-500">{t.calls}</span>
                   </div>
-                  <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-cream dark:bg-stone-800 rounded-full overflow-hidden">
                     <div
                       style={{ width: `${pct}%` }}
-                      className={`h-full rounded-full ${
-                        idx === 0 ? 'bg-amber-500' : 'bg-zinc-900 dark:bg-zinc-200'
-                      }`}
+                      className={`h-full rounded-full ${idx === 0 ? 'bg-accent' : 'bg-espresso dark:bg-cream'}`}
                     />
                   </div>
                 </div>

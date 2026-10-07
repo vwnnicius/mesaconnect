@@ -24,64 +24,55 @@ export function CallCard({ call, onAcknowledge, onComplete }: CallCardProps) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border p-5 transition-all shadow-sm',
-        isCalling && !isUrgent && 'bg-amber-50/70 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800',
-        isCalling && isUrgent && 'bg-rose-50/90 dark:bg-rose-950/30 border-rose-300 dark:border-rose-700 ring-2 ring-rose-400/30',
+        'relative overflow-hidden rounded-box border p-5 shadow-card',
+        isCalling && !isUrgent && 'bg-orange-50/80 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800',
+        isCalling && isUrgent && 'bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800',
         isAcknowledged && 'bg-blue-50/70 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
       )}
     >
-      {/* Top Header of Card */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-4 gap-3">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Salão Principal
-          </span>
-          <h2 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-            MESA {call.table_number || '??'}
+          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-stone-500">
+            Salão principal
+          </p>
+          <h2 className="text-[1.75rem] font-semibold tracking-tight text-stone-900 dark:text-stone-50 leading-tight mt-0.5">
+            Mesa {call.table_number || '—'}
           </h2>
         </div>
 
-        {/* Status Badge & Timer */}
         <div className="text-right">
           <div
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide',
-              isCalling && !isUrgent && 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-              isCalling && isUrgent && 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200 animate-pulse',
-              isAcknowledged && 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+              'inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold',
+              isCalling && !isUrgent && 'bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100',
+              isCalling && isUrgent && 'bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100',
+              isAcknowledged && 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'
             )}
           >
-            {isCalling && isUrgent && <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />}
-            <span>{isCalling ? 'AGUARDANDO' : 'EM ATENDIMENTO'}</span>
+            {isCalling && isUrgent ? <AlertTriangle className="w-3.5 h-3.5" /> : null}
+            {isCalling ? 'Aguardando' : 'Em atendimento'}
           </div>
-
-          <p className="mt-1 font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-            {isCalling ? `há ${elapsed}` : `atendendo há ${elapsed}`}
+          <p className="mt-1.5 font-mono text-sm tabular-nums text-stone-700 dark:text-stone-300">
+            {isCalling ? `há ${elapsed}` : `há ${elapsed}`}
           </p>
         </div>
       </div>
 
-      {/* Action Button - 1 tap large mobile friendly */}
-      <div className="mt-4 pt-3 border-t border-zinc-200/60 dark:border-zinc-800">
+      <div className="pt-3 border-t border-black/5 dark:border-white/10">
         {isCalling ? (
           <Button
             size="lg"
             fullWidth
+            variant="accent"
             onClick={() => onAcknowledge(call.id)}
-            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg py-4 shadow-md active:bg-amber-700"
           >
-            <UserCheck className="w-5 h-5 mr-2" />
-            ATENDER
+            <UserCheck className="w-5 h-5" />
+            Atender mesa
           </Button>
         ) : (
-          <Button
-            size="lg"
-            fullWidth
-            onClick={() => onComplete(call.id)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg py-4 shadow-md active:bg-emerald-800"
-          >
-            <CheckCircle2 className="w-5 h-5 mr-2" />
-            CONCLUIR
+          <Button size="lg" fullWidth variant="success" onClick={() => onComplete(call.id)}>
+            <CheckCircle2 className="w-5 h-5" />
+            Concluir
           </Button>
         )}
       </div>

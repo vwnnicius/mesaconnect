@@ -14,9 +14,8 @@ export function Card({
   return (
     <div
       className={cn(
-        'bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]',
-        hoverEffect &&
-          'transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-zinc-300 dark:hover:border-zinc-700',
+        'bg-cream-paper dark:bg-[#221c18] border border-border rounded-box p-5 shadow-card',
+        hoverEffect && 'transition-colors hover:border-stone-400/70 dark:hover:border-stone-600',
         className
       )}
       {...props}
@@ -33,7 +32,10 @@ export function CardHeader({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex items-center justify-between pb-3 mb-3 border-b border-zinc-100 dark:border-zinc-800/80', className)}
+      className={cn(
+        'flex items-center justify-between pb-3 mb-3 border-b border-border/80',
+        className
+      )}
       {...props}
     >
       {children}
@@ -48,7 +50,10 @@ export function CardTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn('text-base font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight', className)}
+      className={cn(
+        'text-sm font-semibold text-stone-900 dark:text-stone-100 tracking-tight',
+        className
+      )}
       {...props}
     >
       {children}

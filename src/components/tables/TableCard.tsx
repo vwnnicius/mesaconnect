@@ -6,7 +6,7 @@ import { Table } from '@/types';
 import { TABLE_STATUS_CONFIG, RESTAURANT_DEMO } from '@/lib/constants';
 import { StatusDot } from '@/components/ui/StatusDot';
 import { useElapsedTime } from '@/hooks/useElapsedTime';
-import { QrCode, ExternalLink } from 'lucide-react';
+import { QrCode } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TableCardProps {
@@ -21,37 +21,35 @@ export function TableCard({ table }: TableCardProps) {
   return (
     <div
       className={cn(
-        'relative rounded-2xl border p-4 transition-all flex flex-col justify-between shadow-sm',
+        'relative rounded-box border p-4 flex flex-col justify-between shadow-card min-h-[132px]',
         config.bgColor,
         config.borderColor
       )}
     >
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold text-zinc-500">Mesa</span>
+          <span className="text-[11px] font-medium text-stone-500">Mesa</span>
           <StatusDot status={table.status} size="sm" />
         </div>
-
         <div className="flex items-baseline justify-between">
-          <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h3 className="text-2xl font-semibold tabular-nums tracking-tight text-stone-900 dark:text-stone-100">
             {table.number}
           </h3>
-
-          {hasActiveCall && (
-            <span className="font-mono text-xs font-bold text-zinc-700 dark:text-zinc-300">
-              ⏱ {elapsed}
+          {hasActiveCall ? (
+            <span className="font-mono text-xs tabular-nums text-stone-700 dark:text-stone-300">
+              {elapsed}
             </span>
-          )}
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-zinc-200/50 dark:border-zinc-800/80 flex items-center justify-between text-xs text-zinc-500">
-        <span className="truncate max-w-[120px]">{config.description}</span>
+      <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-xs text-stone-500">
+        <span className="truncate pr-2">{config.description}</span>
         <Link
           href={`/evaluate/${RESTAURANT_DEMO.slug}/${table.number}`}
           target="_blank"
-          title="Ver página do QR Code desta mesa"
-          className="p-1 rounded-md hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
+          title="Página de avaliação desta mesa"
+          className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10 text-stone-600 dark:text-stone-400"
         >
           <QrCode className="w-4 h-4" />
         </Link>

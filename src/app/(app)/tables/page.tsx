@@ -6,7 +6,8 @@ import { TableCard } from '@/components/tables/TableCard';
 import { TableStatus } from '@/types';
 import { TABLE_STATUS_CONFIG } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
-import { RotateCw, Cpu, QrCode } from 'lucide-react';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { RotateCw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TablesPage() {
@@ -28,49 +29,32 @@ export default function TablesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-zinc-200/80 dark:border-zinc-800">
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            Visão Geral do Salão
-          </span>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-            Mapa de Mesas
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Status em tempo real de cada mesa e dispositivo físico.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => refresh()}
-            className="p-2.5"
-            title="Atualizar mesas"
-          >
-            <RotateCw className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-          </Button>
-
-          <Link href="/simulator">
-            <Button size="sm" variant="outline" className="border-dashed">
-              <Cpu className="w-4 h-4 mr-1.5 text-amber-500" />
-              Abrir Simulador
+    <div className="space-y-5">
+      <PageHeader
+        kicker="Salão"
+        title="Mapa de mesas"
+        description="Status ao vivo de cada mesa e do botão físico."
+        actions={
+          <>
+            <Button size="sm" variant="outline" onClick={() => refresh()} title="Atualizar">
+              <RotateCw className="w-4 h-4" />
             </Button>
-          </Link>
-        </div>
-      </div>
+            <Link href="/simulator">
+              <Button size="sm" variant="outline">
+                Simulador
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-      {/* Legend & Filter Badges */}
-      <div className="flex flex-wrap items-center gap-2 pt-1">
+      <div className="flex flex-wrap items-center gap-1.5">
         <button
           onClick={() => setFilter('ALL')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+          className={`px-2.5 py-1.5 rounded-md text-xs font-medium border ${
             filter === 'ALL'
-              ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-transparent shadow-sm'
-              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100'
+              ? 'bg-espresso text-cream border-transparent dark:bg-cream dark:text-espresso'
+              : 'bg-cream-paper text-stone-600 border-border hover:border-stone-400'
           }`}
         >
           Todas ({tables.length})
@@ -84,49 +68,36 @@ export default function TablesPage() {
               <button
                 key={statusKey}
                 onClick={() => setFilter(statusKey)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border ${
                   isSelected
-                    ? `${cfg.bgColor} ${cfg.textColor} ${cfg.borderColor} ring-2 ring-zinc-900/10`
-                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50'
+                    ? `${cfg.bgColor} ${cfg.textColor} ${cfg.borderColor}`
+                    : 'bg-cream-paper text-stone-600 border-border hover:border-stone-400'
                 }`}
               >
-                <span>{cfg.icon}</span>
-                <span>{cfg.label}</span>
-                <span className="font-mono ml-0.5 opacity-80">({statusCounts[statusKey]})</span>
+                {cfg.label}
+                <span className="tabular-nums opacity-70">({statusCounts[statusKey]})</span>
               </button>
             );
           }
         )}
       </div>
 
-      {/* Tables Grid */}
       {loading ? (
-        <div className="py-16 text-center text-zinc-400 text-sm animate-pulse">
-          Carregando mapa do salão...
-        </div>
+        <div className="py-16 text-center text-stone-400 text-sm">Carregando salão…</div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {filteredTables.map((table) => (
             <TableCard key={table.id} table={table} />
           ))}
         </div>
       )}
 
-      {/* QR Code Quick Notice Banner */}
-      <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-600 dark:text-zinc-400">
-        <div className="flex items-center gap-2">
-          <QrCode className="w-5 h-5 text-zinc-800 dark:text-zinc-200 flex-shrink-0" />
-          <span>
-            Cada mesa possui um QR Code exclusivo com link direto para avaliação do cliente sem necessidade de login.
-          </span>
-        </div>
-        <Link
-          href="/settings"
-          className="font-semibold text-zinc-900 dark:text-zinc-100 underline whitespace-nowrap"
-        >
-          Gerar QR Codes
+      <p className="text-xs text-stone-500">
+        Cada mesa tem um QR de avaliação.{' '}
+        <Link href="/settings" className="font-medium text-stone-800 dark:text-stone-200 underline">
+          Ver links
         </Link>
-      </div>
+      </p>
     </div>
   );
 }

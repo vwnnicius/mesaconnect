@@ -23,43 +23,41 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <Card
-      hoverEffect
       className={cn(
-        'relative overflow-hidden',
-        highlight && 'border-amber-300 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-950/20'
+        highlight && 'border-orange-300/80 bg-orange-50/40 dark:border-orange-800 dark:bg-orange-950/20'
       )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+          <p className="text-[11px] font-medium text-stone-500 uppercase tracking-[0.08em]">
             {title}
           </p>
-          <h4 className="mt-2 text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 font-mono">
+          <p className="mt-2 text-[1.75rem] font-semibold tabular-nums tracking-tight text-stone-900 dark:text-stone-50 leading-none">
             {value}
-          </h4>
+          </p>
         </div>
-        {icon && (
-          <div className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+        {icon ? (
+          <div className="p-2 rounded-lg bg-cream dark:bg-stone-800 text-stone-600 dark:text-stone-300">
             {icon}
           </div>
-        )}
+        ) : null}
       </div>
 
       {(subtitle || trend) && (
         <div className="mt-3 flex items-center gap-2 text-xs">
-          {trend && (
+          {trend ? (
             <span
               className={cn(
-                'font-bold',
+                'font-medium',
                 trendPositive
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-rose-600 dark:text-rose-400'
+                  ? 'text-emerald-700 dark:text-emerald-400'
+                  : 'text-red-700 dark:text-red-400'
               )}
             >
               {trend}
             </span>
-          )}
-          {subtitle && <span className="text-zinc-500">{subtitle}</span>}
+          ) : null}
+          {subtitle ? <span className="text-stone-500">{subtitle}</span> : null}
         </div>
       )}
     </Card>

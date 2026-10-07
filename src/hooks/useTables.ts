@@ -1,13 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { Table, TableStatus } from '@/types';
 import { getTables, updateTableStatus } from '@/services/tablesService';
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { inMemoryStore } from '@/services/mockStore';
+import { subscribeTableChanges } from '@/lib/realtime';
 import { RESTAURANT_DEMO } from '@/lib/constants';
 
-export function useTables(restaurantId: string = RESTAURANT_DEMO.id) {
+export type TablesApi = {
+  tables: Table[];
+  loading: boolean;
+  refresh: () => Promise<void>;
+  setStatus: (tableId: string, status: TableStatus) => Promise<void>;
+};
+
+export const TablesContext = createContext<TablesApi | null>(null);
+
+export function useTablesState(restaurantId: string = RESTAURANT_DEMO.id): TablesApi {
   const [tables, setTables] = useState<Table[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,38 +34,19 @@ export function useTables(restaurantId: string = RESTAURANT_DEMO.id) {
   useEffect(() => {
     fetchTables();
 
-    // 1. Escuta alterações locais (Simulador e modo demo)
     const unsubscribeStore = inMemoryStore.subscribe(() => {
       fetchTables();
     });
 
-    // 2. Se Supabase configurado, escuta via Supabase Realtime
-    if (isSupabaseConfigured()) {
-      const supabase = createClient();
-      const channel = supabase
-        .channel('realtime_tables')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'tables',
-            filter: `restaurant_id=eq.${restaurantId}`,
-          },
-          () => {
-            fetchTables();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        unsubscribeStore();
-        supabase.removeChannel(channel);
-      };
-    }
+    const unsubscribeRealtime = subscribeTableChanges(
+      'tables',
+      `restaurant_id=eq.${restaurantId}`,
+      fetchTables
+    );
 
     return () => {
       unsubscribeStore();
+      unsubscribeRealtime();
     };
   }, [fetchTables, restaurantId]);
 
@@ -74,4 +64,10 @@ export function useTables(restaurantId: string = RESTAURANT_DEMO.id) {
     refresh: fetchTables,
     setStatus,
   };
+}
+
+export function useTables(): TablesApi {
+  const ctx = useContext(TablesContext);
+  if (ctx) return ctx;
+  throw new Error('useTables deve ser usado dentro de TablesProvider');
 }

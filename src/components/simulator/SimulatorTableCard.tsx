@@ -6,7 +6,7 @@ import { TABLE_STATUS_CONFIG } from '@/lib/constants';
 import { StatusDot } from '@/components/ui/StatusDot';
 import { processDeviceEvent } from '@/services/deviceService';
 import { Button } from '@/components/ui/Button';
-import { BellRing, Moon, RotateCcw, Check, Radio } from 'lucide-react';
+import { BellRing, Moon, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SimulatorTableCardProps {
@@ -35,12 +35,13 @@ export function SimulatorTableCard({
       });
       if (res.success) {
         setLastMessage(res.message);
-        if (onEventTriggered) onEventTriggered();
+        onEventTriggered?.();
       } else {
-        setLastMessage(`Erro: ${res.message}`);
+        setLastMessage(res.message);
       }
-    } catch (err: any) {
-      setLastMessage(`Falha: ${err?.message || 'Erro inesperado'}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro inesperado';
+      setLastMessage(message);
     } finally {
       setLoadingAction(null);
     }
@@ -49,70 +50,56 @@ export function SimulatorTableCard({
   return (
     <div
       className={cn(
-        'rounded-2xl border p-5 shadow-sm transition-all',
+        'rounded-box border p-4 shadow-card',
         config.bgColor,
         config.borderColor
       )}
     >
-      {/* Device Header */}
       <div className="flex items-start justify-between mb-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[11px] font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-              <Radio className="w-3 h-3 text-emerald-500" />
-              {deviceUid}
-            </span>
-          </div>
-          <h3 className="text-2xl font-black text-zinc-900 dark:text-zinc-100">
-            Mesa {table.number}
-          </h3>
+          <p className="font-mono text-[10px] text-stone-500">{deviceUid}</p>
+          <h3 className="text-xl font-semibold mt-0.5">Mesa {table.number}</h3>
         </div>
         <StatusDot status={table.status} size="md" />
       </div>
 
-      {/* Hardware Push-Buttons Simulator */}
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {/* CHAMAR (Botão Principal do ESP32) */}
+      <div className="grid grid-cols-2 gap-2">
         <Button
           size="sm"
+          variant="accent"
           onClick={() => handleAction('CALL')}
           disabled={loadingAction !== null}
-          className="col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 text-sm shadow-sm"
+          className="col-span-2"
         >
-          <BellRing className="w-4 h-4 mr-1.5" />
-          {loadingAction === 'CALL' ? 'Enviando Wi-Fi...' : 'CHAMAR GARÇOM'}
+          <BellRing className="w-4 h-4" />
+          {loadingAction === 'CALL' ? 'Enviando…' : 'Chamar garçom'}
         </Button>
-
-        {/* NÃO INCOMODAR */}
         <Button
           size="sm"
           variant="outline"
           onClick={() => handleAction('DO_NOT_DISTURB')}
           disabled={loadingAction !== null}
-          className="text-rose-600 border-rose-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs py-2"
+          className="text-red-800 border-red-200"
         >
-          <Moon className="w-3.5 h-3.5 mr-1" />
-          NÃO INCOMODAR
+          <Moon className="w-3.5 h-3.5" />
+          Não incomodar
         </Button>
-
-        {/* NORMAL / RESET */}
         <Button
           size="sm"
           variant="outline"
           onClick={() => handleAction('RESET')}
           disabled={loadingAction !== null}
-          className="text-zinc-700 border-zinc-200 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 text-xs py-2"
         >
-          <RotateCcw className="w-3.5 h-3.5 mr-1" />
-          RESET (NORMAL)
+          <RotateCcw className="w-3.5 h-3.5" />
+          Reset
         </Button>
       </div>
 
-      {lastMessage && (
-        <p className="mt-3 text-[11px] font-mono text-zinc-600 dark:text-zinc-400 bg-white/60 dark:bg-zinc-950/60 p-1.5 rounded-lg border border-zinc-200/50 truncate">
-          ✓ {lastMessage}
+      {lastMessage ? (
+        <p className="mt-3 text-[11px] font-mono text-stone-600 dark:text-stone-400 truncate">
+          {lastMessage}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

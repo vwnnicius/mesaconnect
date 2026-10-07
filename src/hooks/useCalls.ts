@@ -1,17 +1,27 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { ServiceCall } from '@/types';
 import {
   getActiveCalls,
   acknowledgeServiceCall,
   completeServiceCall,
 } from '@/services/callsService';
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { inMemoryStore } from '@/services/mockStore';
+import { subscribeTableChanges } from '@/lib/realtime';
 import { RESTAURANT_DEMO } from '@/lib/constants';
 
-export function useCalls(restaurantId: string = RESTAURANT_DEMO.id) {
+export type CallsApi = {
+  calls: ServiceCall[];
+  loading: boolean;
+  refresh: () => Promise<void>;
+  acknowledge: (callId: string) => Promise<void>;
+  complete: (callId: string) => Promise<void>;
+};
+
+export const CallsContext = createContext<CallsApi | null>(null);
+
+export function useCallsState(restaurantId: string = RESTAURANT_DEMO.id): CallsApi {
   const [calls, setCalls] = useState<ServiceCall[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,43 +39,23 @@ export function useCalls(restaurantId: string = RESTAURANT_DEMO.id) {
   useEffect(() => {
     fetchCalls();
 
-    // 1. Escuta alterações locais (Simulador e modo demo)
     const unsubscribeStore = inMemoryStore.subscribe(() => {
       fetchCalls();
     });
 
-    // 2. Se Supabase configurado, escuta via Supabase Realtime
-    if (isSupabaseConfigured()) {
-      const supabase = createClient();
-      const channel = supabase
-        .channel('realtime_calls')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'service_calls',
-            filter: `restaurant_id=eq.${restaurantId}`,
-          },
-          () => {
-            fetchCalls();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        unsubscribeStore();
-        supabase.removeChannel(channel);
-      };
-    }
+    const unsubscribeRealtime = subscribeTableChanges(
+      'service_calls',
+      `restaurant_id=eq.${restaurantId}`,
+      fetchCalls
+    );
 
     return () => {
       unsubscribeStore();
+      unsubscribeRealtime();
     };
   }, [fetchCalls, restaurantId]);
 
   const acknowledge = async (callId: string) => {
-    // Atualização otimista imediata na UI
     setCalls((prev) =>
       prev.map((c) =>
         c.id === callId
@@ -78,7 +68,6 @@ export function useCalls(restaurantId: string = RESTAURANT_DEMO.id) {
   };
 
   const complete = async (callId: string) => {
-    // Remoção otimista imediata da fila
     setCalls((prev) => prev.filter((c) => c.id !== callId));
     await completeServiceCall(callId);
     fetchCalls();
@@ -91,4 +80,10 @@ export function useCalls(restaurantId: string = RESTAURANT_DEMO.id) {
     acknowledge,
     complete,
   };
+}
+
+export function useCalls(): CallsApi {
+  const ctx = useContext(CallsContext);
+  if (ctx) return ctx;
+  throw new Error('useCalls deve ser usado dentro de CallsProvider');
 }

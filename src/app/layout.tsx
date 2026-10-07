@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from 'next';
+import { DM_Sans } from 'next/font/google';
 import './globals.css';
 
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'MesaConnect - Sistema de Atendimento por Mesa em Tempo Real',
+  title: 'MesaConnect — Atendimento por mesa em tempo real',
   description:
-    'Plataforma SaaS moderna para atendimento ágil em restaurantes e rodízios com suporte a botões inteligentes ESP32.',
+    'Painel operacional para restaurantes e rodízios: chamados da mesa, mapa do salão e SLA da equipe.',
 };
 
 export const viewport: Viewport = {
@@ -12,6 +19,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: '#1f1814',
 };
 
 export default function RootLayout({
@@ -20,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] text-[#09090b] dark:text-[#fafafa]">
+    <html lang="pt-BR" className={dmSans.variable}>
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased">
         {children}
       </body>
     </html>

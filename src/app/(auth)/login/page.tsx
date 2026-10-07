@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/Button';
-import { UtensilsCrossed, Lock, Mail, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import { RESTAURANT_DEMO } from '@/lib/constants';
+import { BrandMark } from '@/components/layout/BrandMark';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +21,6 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     if (!isSupabaseConfigured()) {
-      // Modo Demo/Local sem credenciais Supabase
       router.push('/dashboard');
       return;
     }
@@ -33,122 +33,117 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setErrorMsg(error.message || 'Credenciais inválidas. Verifique seu e-mail e senha.');
+        setErrorMsg(error.message || 'Credenciais inválidas. Verifique e-mail e senha.');
       } else if (data.session) {
         router.push('/dashboard');
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Erro inesperado ao conectar ao servidor.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro inesperado ao conectar.';
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoAccess = () => {
-    router.push('/dashboard');
-  };
-
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-zinc-50 dark:bg-zinc-950">
-      <div className="w-full max-w-md">
-        {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xl mb-4">
-            <UtensilsCrossed className="w-7 h-7" />
+    <div className="min-h-screen grid lg:grid-cols-2 bg-cream dark:bg-[#161210]">
+      <div className="hidden lg:flex flex-col justify-between p-10 bg-espresso text-cream relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.07] grain"
+          aria-hidden
+        />
+        <div className="relative">
+          <div className="flex items-center gap-3">
+            <BrandMark className="w-9 h-9" />
+            <span className="font-semibold tracking-tight">MesaConnect</span>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">
-            MesaConnect
+        </div>
+        <div className="relative max-w-md">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-orange-300/90 mb-3">
+            Operação de salão
+          </p>
+          <h1 className="text-4xl font-semibold tracking-tight leading-[1.15]">
+            O botão da mesa chega no painel antes do gesto.
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Painel Operacional • {RESTAURANT_DEMO.name}
+          <p className="mt-4 text-stone-400 text-[15px] leading-relaxed">
+            Chamados em tempo real, mapa do salão e tempo de resposta da equipe — feito para
+            rodízio e casa de alto giro.
           </p>
         </div>
+        <p className="relative text-xs text-stone-500">{RESTAURANT_DEMO.name} · unidade demo</p>
+      </div>
 
-        {/* Login Card */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+      <div className="flex flex-col justify-center px-5 py-12 sm:px-10">
+        <div className="w-full max-w-[400px] mx-auto">
+          <div className="lg:hidden flex items-center gap-2.5 mb-8">
+            <BrandMark className="w-8 h-8" />
+            <span className="font-semibold">MesaConnect</span>
+          </div>
+
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-100">
+            Entrar no painel
+          </h2>
+          <p className="text-sm text-stone-500 mt-1.5 mb-8">
+            Use o e-mail da equipe ou o acesso de demonstração.
+          </p>
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
-                E-mail do Colaborador
+              <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
+                E-mail
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                  <Mail className="w-4 h-4" />
-                </div>
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="gerente@saborgrill.com.br"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-cream-paper dark:bg-[#221c18] text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
-                Senha de Acesso
+              <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
+                Senha
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                  <Lock className="w-4 h-4" />
-                </div>
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-border bg-cream-paper dark:bg-[#221c18] text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
             </div>
 
-            {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            {errorMsg ? (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 text-xs flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
-            )}
+            ) : null}
 
-            <Button
-              type="submit"
-              disabled={loading}
-              fullWidth
-              size="lg"
-              className="mt-2"
-            >
-              {loading ? 'Validando acesso...' : 'Entrar no Sistema'}
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button type="submit" disabled={loading} fullWidth size="lg">
+              {loading ? 'Entrando…' : 'Entrar'}
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </form>
 
-          {/* Quick Demo Access Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-zinc-900 px-2 text-zinc-400">
-                Apresentação e Testes
-              </span>
-            </div>
+          <div className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth
+              onClick={() => router.push('/dashboard')}
+            >
+              Continuar como João · garçom (demo)
+            </Button>
           </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            fullWidth
-            onClick={handleDemoAccess}
-            className="border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs py-3"
-          >
-            <Sparkles className="w-3.5 h-3.5 mr-2 text-amber-500" />
-            Acessar com Perfil Demo (João - Garçom)
-          </Button>
         </div>
-
-        <p className="text-center text-xs text-zinc-400 mt-6">
-          MesaConnect MVP • Autenticado com Supabase Auth
-        </p>
       </div>
     </div>
   );

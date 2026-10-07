@@ -14,25 +14,42 @@ const config: Config = {
         border: "var(--border)",
         card: "var(--card)",
         "card-foreground": "var(--card-foreground)",
-        primary: {
-          DEFAULT: "#18181b",
-          foreground: "#fafafa",
-        },
         muted: {
-          DEFAULT: "#f4f4f5",
-          foreground: "#71717a",
+          DEFAULT: "#f0e7dc",
+          foreground: "var(--muted)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "#fff7ed",
+        },
+        espresso: {
+          DEFAULT: "#1f1814",
+          muted: "#3d3229",
+        },
+        cream: {
+          DEFAULT: "#f3ece3",
+          paper: "#faf6f1",
+        },
+        primary: {
+          DEFAULT: "#1f1814",
+          foreground: "#faf6f1",
         },
         status: {
-          available: "#10b981",    // Verde
-          dnd: "#ef4444",          // Vermelho (Não incomodar)
-          calling: "#f59e0b",      // Amarelo
-          acknowledged: "#3b82f6", // Azul
-          offline: "#9ca3af",      // Cinza
+          available: "#047857",
+          dnd: "#b91c1c",
+          calling: "#c2410c",
+          acknowledged: "#1d4ed8",
+          offline: "#78716c",
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        card: "0 1px 0 rgba(31,24,20,0.04), 0 8px 24px -16px rgba(31,24,20,0.18)",
+      },
+      borderRadius: {
+        box: "12px",
       },
     },
   },
