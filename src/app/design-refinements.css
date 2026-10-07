@@ -192,6 +192,11 @@ select:focus-visible {
   color: #fff;
   border-color: var(--accent);
 }
+.dark .journey-progress > .journey-reached:not(.journey-current) > span {
+  background: var(--mc-green);
+  color: var(--mc-page);
+  border-color: var(--mc-green);
+}
 .journey-progress p {
   font-size: 12px;
   font-weight: 500;
