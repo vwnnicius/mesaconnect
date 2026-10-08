@@ -37,6 +37,7 @@ export default function DevicesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        kicker="benservire one"
         title="Dispositivos"
         description="Configuração do ESP32, da rede Wi-Fi e do botão de cada mesa."
       />

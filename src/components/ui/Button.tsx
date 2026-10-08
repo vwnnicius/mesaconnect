@@ -28,17 +28,16 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium transition duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 disabled:pointer-events-none select-none rounded-xl";
+      "bs-button inline-flex items-center justify-center font-medium transition duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 disabled:pointer-events-none select-none rounded-xl";
 
     const variantStyles = {
-      primary: "bg-espresso text-white hover:bg-espresso-muted",
-      secondary: "bg-white text-stone-800 hover:bg-cream border border-border",
-      outline:
-        "border border-border bg-transparent hover:bg-white/70 text-stone-800",
-      danger: "bg-red-700 text-white hover:bg-red-800",
-      success: "bg-emerald-800 text-white hover:bg-emerald-900",
-      ghost: "hover:bg-black/5 text-stone-700",
-      accent: "bg-accent text-white hover:brightness-110",
+      primary: "bs-button--primary",
+      secondary: "bs-button--secondary",
+      outline: "bs-button--outline",
+      danger: "bs-button--danger",
+      success: "bs-button--success",
+      ghost: "bs-button--ghost",
+      accent: "bs-button--accent",
     };
 
     const sizeStyles = {

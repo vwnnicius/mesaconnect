@@ -26,12 +26,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const navItems = [
-  { name: "Painel", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Visão geral", href: "/dashboard", icon: LayoutDashboard },
   { name: "Chamados", href: "/calls", icon: BellRing, badge: true },
-  { name: "Salão", href: "/tables", icon: Grid3X3 },
+  { name: "Mesas", href: "/tables", icon: Grid3X3 },
   { name: "Tela", href: "/screen", icon: Monitor },
   { name: "Atividade", href: "/activity", icon: ListChecks },
-  { name: "Desempenho", href: "/analytics", icon: BarChart3 },
+  { name: "Insights", href: "/analytics", icon: BarChart3 },
   { name: "Avaliações", href: "/evaluations", icon: Star },
   { name: "Demo interativa", href: "/demo", icon: Play },
   { name: "Simulador", href: "/simulator", icon: Cpu },
@@ -70,11 +70,8 @@ export function Sidebar() {
       <div className="flex items-center gap-3 px-5 h-[76px]">
         <BrandMark className="w-8 h-8" />
         <div className="min-w-0">
-          <p className="font-semibold text-[15px] tracking-tight leading-none">
-            MesaConnect
-          </p>
-          <p className="text-[11px] text-muted-foreground truncate mt-1">
-            Atendimento por mesa
+          <p className="font-semibold text-[20px] tracking-tight leading-none">
+            benservire
           </p>
         </div>
       </div>
@@ -83,9 +80,6 @@ export function Sidebar() {
         aria-label="Navegação principal"
         className="flex-1 px-3 py-6 space-y-1 overflow-y-auto"
       >
-        <p className="px-3 mb-3 text-[11px] text-muted-foreground font-medium">
-          Restaurante
-        </p>
         {navItems
           .filter(
             (item) =>
@@ -98,44 +92,57 @@ export function Sidebar() {
             const Icon = item.icon;
 
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "group flex items-center justify-between px-3 py-2.5 text-[13px] rounded-lg transition-colors",
-                  item.href === "/screen" &&
-                    "border border-accent/20 text-accent",
-                  isActive
-                    ? "bg-background text-foreground font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background",
-                )}
-              >
-                <span className="flex items-center gap-2.5">
-                  <Icon
-                    aria-hidden
-                    className={cn(
-                      "w-4 h-4",
-                      isActive ? "text-accent" : "text-muted-foreground",
-                    )}
-                    strokeWidth={1.7}
-                  />
-                  {item.name}
-                </span>
-
-                {item.badge && pendingCallsCount > 0 ? (
-                  <span
-                    className={cn(
-                      "min-w-[1.25rem] h-5 px-1.5 text-[11px] font-semibold rounded-md text-center leading-5",
-                      isActive
-                        ? "bg-accent text-white"
-                        : "bg-accent text-white",
-                    )}
-                  >
-                    {pendingCallsCount}
+              <React.Fragment key={item.href}>
+                {["/dashboard", "/calls", "/activity", "/demo"].includes(
+                  item.href,
+                ) && (
+                  <span className="nav-group-label">
+                    {item.href === "/dashboard"
+                      ? "Agora"
+                      : item.href === "/calls"
+                        ? "Atendimento"
+                        : item.href === "/activity"
+                          ? "Gestão"
+                          : "Sistema"}
                   </span>
-                ) : null}
-              </Link>
+                )}
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "sidebar-link group flex items-center justify-between px-3 py-2.5 text-[13px] rounded-lg transition-colors",
+                    isActive
+                      ? "bg-background text-foreground font-semibold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background",
+                  )}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Icon
+                      aria-hidden
+                      className={cn(
+                        "w-4 h-4",
+                        isActive ? "text-accent" : "text-muted-foreground",
+                      )}
+                      strokeWidth={1.7}
+                    />
+                    {item.name}
+                  </span>
+
+                  {item.badge && pendingCallsCount > 0 ? (
+                    <span
+                      className={cn(
+                        "min-w-[1.25rem] h-5 px-1.5 text-[11px] font-semibold rounded-md text-center leading-5",
+                        isActive
+                          ? "bg-accent text-white"
+                          : "bg-accent text-white",
+                      )}
+                    >
+                      {pendingCallsCount}
+                    </span>
+                  ) : null}
+                </Link>
+              </React.Fragment>
             );
           })}
       </nav>

@@ -1,4 +1,4 @@
-# MesaConnect — da demonstração ao piloto
+# Benservire — da demonstração ao piloto
 
 Proposta de produto e implementação, 7 de outubro de 2026. Este documento descreve trabalho futuro; não representa funcionalidades já implementadas.
 
@@ -8,7 +8,7 @@ O painel usa o padrão lateral + indicadores + caixas + gráficos. A fila e o ma
 
 ## Contas e estabelecimentos
 
-Uma plataforma MesaConnect atende vários estabelecimentos. Cada pessoa tem sua própria conta Supabase Auth; o estabelecimento é uma organização, não uma senha compartilhada. Uma associação determina onde a pessoa trabalha e seu papel.
+Uma plataforma Benservire atende vários estabelecimentos. Cada pessoa tem sua própria conta Supabase Auth; o estabelecimento é uma organização, não uma senha compartilhada. Uma associação determina onde a pessoa trabalha e seu papel.
 
 | Papel | Acesso proposto |
 | --- | --- |

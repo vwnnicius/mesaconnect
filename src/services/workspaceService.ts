@@ -68,7 +68,7 @@ export function storeDemoWorkspace(
 export async function uploadAsset(
   file: File,
   restaurantId: string,
-  kind: "logo" | "cover" | "avatar",
+  kind: "logo" | "cover" | "avatar" | "photo",
   userId?: string,
 ) {
   if (

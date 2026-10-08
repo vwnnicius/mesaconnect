@@ -26,21 +26,21 @@ export function StatusDot({
 
   return (
     <span
+      data-status={status}
       className={cn(
-        "inline-flex items-center gap-2 font-medium text-xs",
+        "status-indicator inline-flex items-center gap-2 font-medium text-xs",
         className,
       )}
     >
       <span className="relative flex items-center justify-center">
         <span
           className={cn(
-            "relative inline-block rounded-full",
+            "status-indicator-dot relative inline-block rounded-full",
             dotSizes[size],
-            config.dotColor,
           )}
         />
       </span>
-      {showText && <span className={config.textColor}>{config.label}</span>}
+      {showText && <span>{config.label}</span>}
     </span>
   );
 }

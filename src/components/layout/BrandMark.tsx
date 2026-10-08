@@ -8,19 +8,13 @@ export function BrandMark({ className }: { className?: string }) {
       aria-hidden
     >
       <path
-        d="M8 9a15 15 0 0 1 23 12"
+        d="M10 7v17c0 4 3 6 7 6h2c5 0 8-3 8-8s-3-8-8-8h-3"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
       />
       <path
-        d="M27 29A15 15 0 0 1 4 15"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M10 19h16M13 19v8m10-8v8m-9-13a6 6 0 0 1 8 0m-6-4a3 3 0 0 1 4 0"
+        d="M16 20h3c1.5 0 2.5 1 2.5 2.5S20.5 25 19 25h-3"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"

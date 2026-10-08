@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
 import { createClient } from "@/lib/supabase/client";
 import { AssetImage } from "@/components/ui/AssetImage";
@@ -10,6 +10,8 @@ import { useTables } from "@/hooks/useTables";
 import { GoogleReviews } from "@/components/settings/GoogleReviews";
 import { DevicePairing } from "@/components/settings/DevicePairing";
 import { TableQRCode } from "@/components/settings/TableQRCode";
+import { ActivityCleanup } from "@/components/settings/ActivityCleanup";
+import { EstablishmentPhotos } from "@/components/settings/EstablishmentPhotos";
 export default function SettingsPage() {
   const w = useWorkspace();
   const { tables } = useTables();
@@ -26,6 +28,12 @@ export default function SettingsPage() {
   const [resetTarget, setResetTarget] = useState<StaffProfile | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [unit, setUnit] = useState({ name: "", slug: "", tables: 12 });
+  useEffect(() => {
+    setName(w.restaurant.name);
+    setResetTarget(null);
+    setNewPassword("");
+    setMessage("");
+  }, [w.restaurant.id, w.restaurant.name]);
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
     setMessage("");
@@ -81,12 +89,13 @@ export default function SettingsPage() {
       />
       <div className="workspace-tabs" role="group" aria-label="Configurações">
         {[
-          ["brand", "Identidade visual"],
+          ["brand", w.platformAdmin ? "Logos e fotos" : "Identidade visual"],
           ["team", "Equipe e acessos"],
           ["google", "Google e QR"],
           ["qr", "Links das mesas"],
           ...(w.platformAdmin ? [["devices", "Dispositivos"]] : []),
           ...(w.platformAdmin ? [["units", "Estabelecimentos"]] : []),
+          ...(w.platformAdmin ? [["maintenance", "Logs de atividade"]] : []),
         ].map(([key, label]) => (
           <button
             key={key}
@@ -101,6 +110,7 @@ export default function SettingsPage() {
         ))}
       </div>
       {tab === "google" && <GoogleReviews key={w.restaurant.id} />}
+      {tab === "maintenance" && <ActivityCleanup key={w.restaurant.id} />}
       {tab === "brand" && (
         <section className="surface settings-form">
           <h2>Identidade do estabelecimento</h2>
@@ -196,6 +206,9 @@ export default function SettingsPage() {
             Salvar identidade
           </button>
         </section>
+      )}
+      {tab === "brand" && w.platformAdmin && (
+        <EstablishmentPhotos key={w.restaurant.id} />
       )}
       {tab === "team" && (
         <>

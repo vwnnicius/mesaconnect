@@ -100,7 +100,7 @@ export default function ScreenPage() {
       {error && <p role="alert">{error}</p>}
       {loading && <p>Carregando mesas…</p>}
       <div className="wall-legend">
-        <span>Verde: disponível</span>
+        <span>Disponível: sem solicitação ativa</span>
         <span>Âmbar pulsante: chamando</span>
         <span>Azul: em atendimento</span>
         <span>Vermelho: não incomodar</span>

@@ -1,4 +1,4 @@
-# MesaConnect — ESP32 de referência
+# Benservire One — ESP32 de referência
 
 Configuração e pareamento na aba **Dispositivos**, exclusiva do administrador geral. O código é um ponto de partida para ESP32 DevKit clássica, não um hardware homologado. Não foi ensaiado fisicamente nesta revisão.
 

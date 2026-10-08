@@ -18,9 +18,9 @@ export function MobileNav() {
 
   const items = [
     { name: "Chamados", href: "/calls", icon: BellRing, badge: callingCount },
-    { name: "Salão", href: "/tables", icon: Grid3X3 },
+    { name: "Mesas", href: "/tables", icon: Grid3X3 },
     {
-      name: manager ? "Painel" : "Tela",
+      name: manager ? "Visão geral" : "Tela",
       href: manager ? "/dashboard" : "/screen",
       icon: LayoutDashboard,
     },
@@ -29,7 +29,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Navegação no celular"
-      className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur-md border-t border-border pb-safe"
+      className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-card border-t border-border pb-safe"
     >
       {moreOpen ? (
         <div
@@ -42,7 +42,7 @@ export function MobileNav() {
             ["Tela", "/screen"],
             ...(manager
               ? [
-                  ["Relatórios", "/analytics"],
+                  ["Insights", "/analytics"],
                   ["Atividade", "/activity"],
                   ["Avaliações", "/evaluations"],
                   ["Simulador", "/simulator"],

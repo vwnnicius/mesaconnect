@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useOperationMetrics } from "@/hooks/useOperationMetrics";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { operationalTime } from "@/lib/operational-time";
 export default function AnalyticsPage() {
   const [days, setDays] = useState(1);
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
@@ -16,12 +17,15 @@ export default function AnalyticsPage() {
   } = useOperationMetrics(days, month, employee);
   const { manager, members } = useWorkspace();
   if (!manager) return <p>Relatórios disponíveis para a administração.</p>;
-  const time = (n: number | null) =>
-    n === null ? "—" : `${(n / 60).toFixed(1).replace(".", ",")} min`;
+  const time = operationalTime;
+  const peak = m.hours.reduce((a, b) => (b.calls > a.calls ? b : a), {
+    hour: 0,
+    calls: 0,
+  });
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Relatórios"
+        title="Insights"
         description="Indicadores calculados a partir dos atendimentos desta unidade."
         actions={
           <select
@@ -71,6 +75,36 @@ export default function AnalyticsPage() {
         </p>
       )}
       {loading && <p role="status">Atualizando indicadores…</p>}
+      {!loading && !error && (
+        <section className="surface">
+          <h2>
+            {m.total
+              ? "O atendimento neste período"
+              : "Ainda sem atendimentos neste período."}
+          </h2>
+          {m.response !== null && (
+            <p className="mt-3">
+              Seus clientes esperaram em média{" "}
+              <strong>{time(m.response)}</strong> até a equipe assumir o
+              chamado.
+            </p>
+          )}
+          {peak.calls > 0 && (
+            <p className="mt-3">
+              <strong>
+                {peak.hour}h–{peak.hour + 1}h
+              </strong>{" "}
+              foi um dos horários de maior demanda, com {peak.calls} chamado(s).
+            </p>
+          )}
+          {m.sla !== null && (
+            <p className="mt-3">
+              Entre os chamados assumidos, <strong>{m.sla}%</strong> receberam
+              resposta em até 2 minutos.
+            </p>
+          )}
+        </section>
+      )}
       <div className="dashboard-metrics">
         <div>
           <span>Chamados</span>
@@ -122,7 +156,7 @@ export default function AnalyticsPage() {
           <p className="mt-4">
             {m.sla === null
               ? "Ainda não há aceites suficientes para medir o prazo."
-              : `${m.sla}% dos chamados foram assumidos em até 2 minutos.`}
+              : `${m.sla}% dos chamados assumidos receberam resposta em até 2 minutos.`}
           </p>
         </section>
       </div>

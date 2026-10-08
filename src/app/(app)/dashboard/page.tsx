@@ -9,6 +9,7 @@ import { useOperationMetrics } from "@/hooks/useOperationMetrics";
 import { useWorkspace } from "@/providers/WorkspaceProvider";
 import { FloorPlan } from "@/components/tables/FloorPlan";
 import { CallCard } from "@/components/calls/CallCard";
+import { operationalTime } from "@/lib/operational-time";
 export default function DashboardPage() {
   const { calls, loading, error, acknowledge, complete } = useCalls();
   const { tables } = useTables();
@@ -36,7 +37,13 @@ export default function DashboardPage() {
           {greeting}, {w.profile.name.split(" ")[0]}.
         </h1>
         <p>
-          Um olhar para o salão. Mais tempo para cuidar de quem está à mesa.
+          {loading
+            ? "Conferindo o salão…"
+            : error
+              ? "Não foi possível conferir o salão."
+              : calls.filter((c) => c.status === "CALLING").length
+                ? `${calls.filter((c) => c.status === "CALLING").length} mesa(s) precisam de atenção.`
+                : "Seu salão está tranquilo."}
         </p>
       </div>
       <div className="dashboard-metrics">
@@ -47,11 +54,7 @@ export default function DashboardPage() {
         </div>
         <div>
           <span>Tempo médio de resposta</span>
-          <strong>
-            {m.response === null
-              ? "—"
-              : `${(m.response / 60).toFixed(1).replace(".", ",")} min`}
-          </strong>
+          <strong>{history.loading ? "—" : operationalTime(m.response)}</strong>
           <small>Da solicitação ao aceite</small>
         </div>
         <div>
@@ -62,15 +65,9 @@ export default function DashboardPage() {
           <small>{history.feedbackCount} avaliações hoje</small>
         </div>
         <div>
-          <span>Mesas com chamado</span>
-          <strong>
-            {new Set(calls.map((c) => c.table_id)).size}
-            <small> / {tables.length}</small>
-          </strong>
-          <small>
-            {calls.filter((c) => c.status === "CALLING").length} aguardando
-            atendimento
-          </small>
+          <span>Tempo médio de atendimento</span>
+          <strong>{history.loading ? "—" : operationalTime(m.duration)}</strong>
+          <small>Do aceite à conclusão</small>
         </div>
       </div>
       {(error || history.error || floor.error) && (

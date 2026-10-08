@@ -73,7 +73,11 @@ export function Header({
           <Bell size={19} />
           {count > 0 && <b>{count}</b>}
         </Link>
-        <Link href="/profile" className="workspace-person">
+        <Link
+          href="/profile"
+          className="workspace-person"
+          aria-label="Seu perfil"
+        >
           <AssetImage
             path={profile.avatar_path}
             name={profile.name}

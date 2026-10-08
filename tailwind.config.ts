@@ -16,7 +16,7 @@ const config: Config = {
         card: "var(--card)",
         "card-foreground": "var(--card-foreground)",
         muted: {
-          DEFAULT: "#f0f2f5",
+          DEFAULT: "var(--background)",
           foreground: "var(--muted)",
         },
         accent: {
@@ -24,15 +24,15 @@ const config: Config = {
           foreground: "#ffffff",
         },
         espresso: {
-          DEFAULT: "#202329",
-          muted: "#353a43",
+          DEFAULT: "var(--foreground)",
+          muted: "var(--muted)",
         },
         cream: {
           DEFAULT: "var(--background)",
           paper: "var(--card)",
         },
         primary: {
-          DEFAULT: "#202329",
+          DEFAULT: "var(--foreground)",
           foreground: "#ffffff",
         },
         status: {
@@ -44,7 +44,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "sans-serif"],
+        sans: ["var(--font-geist)", "Arial", "sans-serif"],
       },
       boxShadow: {
         card: "0 1px 2px rgba(20,25,35,0.025)",

@@ -75,9 +75,11 @@ export function CallCard({
       <p className="call-meta">
         {isCalling
           ? "Pedido de atendimento"
-          : owner
-            ? `Atendimento com ${owner}`
-            : "Atendimento em andamento"}
+          : call.acknowledged_by === profile.id
+            ? "Você está atendendo esta mesa."
+            : owner
+              ? `${owner} está atendendo.`
+              : "Atendimento em andamento"}
       </p>
       {canAct && (
         <button

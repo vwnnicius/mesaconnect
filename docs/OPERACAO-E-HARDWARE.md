@@ -1,4 +1,4 @@
-# Colocar o MesaConnect em prática
+# Colocar o Benservire em prática
 
 ## Contas e estabelecimentos
 
@@ -70,7 +70,7 @@ Administrador geral acessa todas as unidades e dispositivos. Proprietário acess
 
 Os exemplos Aurora, Brasa & Lenha e Jardim da Mesa são unidades fictícias isoladas, com plantas diferentes e cinco usuários cada. As senhas não estão neste documento. Use o arquivo privado entregue no computador.
 
-Em Configurações → Google e QR, adicione o link HTTPS oficial de avaliação do estabelecimento. O QR é gerado automaticamente após salvar. O cliente pode avaliar no Google independentemente da nota dada no MesaConnect. Não use link inventado para empresas fictícias.
+Em Configurações → Google e QR, adicione o link HTTPS oficial de avaliação do estabelecimento. O QR é gerado automaticamente após salvar. O cliente pode avaliar no Google independentemente da nota dada no Benservire. Não use link inventado para empresas fictícias.
 
 Em Desempenho, selecione mês ou histórico completo e um funcionário. Ranking mede resposta operacional, não determina sozinho qualidade do trabalho. Avaliação genérica da mesa não é atribuída artificialmente a um funcionário.
 

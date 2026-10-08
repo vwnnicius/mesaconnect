@@ -62,10 +62,8 @@ export default function CallsPage() {
               <RotateCw className="w-4 h-4" />
             </Button>
             {manager && (
-              <Link href="/simulator">
-                <Button size="sm" variant="outline">
-                  Simular botão
-                </Button>
+              <Link href="/simulator" className="action-outline">
+                Simular botão
               </Link>
             )}
           </>
@@ -114,22 +112,20 @@ export default function CallsPage() {
       ) : null}
 
       {loading ? (
-        <div className="py-16 text-center text-stone-400 text-sm">
+        <div className="py-16 text-center text-muted-foreground text-sm">
           Carregando fila…
         </div>
       ) : filteredCalls.length === 0 ? (
         <div className="py-14 text-center rounded-box border border-border bg-cream-paper dark:bg-card px-6">
-          <h3 className="text-base font-semibold">Fila vazia</h3>
-          <p className="text-sm text-stone-500 mt-1 max-w-sm mx-auto">
+          <h3 className="text-base font-semibold">Tudo tranquilo.</h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
             {filter === "ALL"
               ? "Nenhuma mesa precisa de atendimento agora."
               : "Não há chamados neste filtro."}
           </p>
           {manager && (
-            <Link href="/simulator" className="inline-block mt-4">
-              <Button size="sm" variant="accent">
-                Abrir simulador
-              </Button>
+            <Link href="/simulator" className="action-solid mt-4">
+              Abrir simulador
             </Link>
           )}
         </div>

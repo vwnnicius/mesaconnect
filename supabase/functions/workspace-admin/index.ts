@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
+import { logScope } from "./log-scope.ts";
 const headers = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -30,6 +31,66 @@ Deno.serve(async (request: Request) => {
     return reply({ error: "Sem permissão" }, 403);
   try {
     const body = await request.json();
+    if (body.action === "list_unit_media") {
+      if (!global) return reply({ error: "Somente administrador geral" }, 403);
+      let scope;
+      try {
+        scope = logScope({ scope: "unit", restaurant_id: body.restaurant_id });
+      } catch {
+        return reply({ error: "Estabelecimento inválido." }, 400);
+      }
+      const { data, error } = await admin.storage
+        .from("restaurant-brand")
+        .list(`${scope.unit}/photo`, {
+          limit: 100,
+          sortBy: { column: "created_at", order: "desc" },
+        });
+      if (error)
+        return reply({ error: "Não foi possível carregar as fotos." }, 400);
+      return reply({
+        paths: (data ?? [])
+          .filter((f) => f.id)
+          .map((f) => `${scope.unit}/photo/${f.name}`),
+      });
+    }
+    if (body.action === "logs_preview" || body.action === "clear_logs") {
+      if (!global) return reply({ error: "Somente administrador geral" }, 403);
+      let scope;
+      try {
+        scope = logScope(body);
+      } catch (e) {
+        return reply(
+          { error: e instanceof Error ? e.message : "Confirmação inválida" },
+          400,
+        );
+      }
+      if (scope.unit) {
+        const { data, error } = await admin
+          .from("restaurants")
+          .select("id")
+          .eq("id", scope.unit)
+          .single();
+        if (error || !data)
+          return reply({ error: "Estabelecimento não encontrado." }, 404);
+      }
+      const cutoff =
+        body.action === "logs_preview" ? new Date().toISOString() : body.cutoff;
+      let query =
+        body.action === "logs_preview"
+          ? admin
+              .from("activity_logs")
+              .select("id", { count: "exact", head: true })
+              .lte("created_at", cutoff)
+          : admin
+              .from("activity_logs")
+              .delete({ count: "exact" })
+              .lte("created_at", cutoff);
+      if (scope.unit) query = query.eq("restaurant_id", scope.unit);
+      const { count, error } = await query;
+      if (error)
+        return reply({ error: "Não foi possível acessar os logs." }, 400);
+      return reply({ count: count ?? 0, cutoff, phrase: scope.phrase });
+    }
     if (body.action === "check_access")
       return reply({ authorized: true, platform_admin: global });
     if (body.action === "create_unit") {
@@ -136,16 +197,14 @@ Deno.serve(async (request: Request) => {
         user_metadata: { name: String(body.name).slice(0, 100) },
       });
       if (!error && data.user) {
-        const { error: profileError } = await admin
-          .from("profiles")
-          .upsert({
-            id: data.user.id,
-            restaurant_id: null,
-            name: String(body.name).slice(0, 100),
-            role: "OWNER",
-            username,
-            active: true,
-          });
+        const { error: profileError } = await admin.from("profiles").upsert({
+          id: data.user.id,
+          restaurant_id: null,
+          name: String(body.name).slice(0, 100),
+          role: "OWNER",
+          username,
+          active: true,
+        });
         if (profileError)
           return reply(
             {
@@ -202,16 +261,14 @@ Deno.serve(async (request: Request) => {
       user_metadata: { name: body.name.trim().slice(0, 100) },
     });
     if (!error && data.user) {
-      const { error: profileError } = await admin
-        .from("profiles")
-        .upsert({
-          id: data.user.id,
-          restaurant_id: unit,
-          name: body.name.trim().slice(0, 100),
-          role: body.role,
-          username: body.username,
-          active: true,
-        });
+      const { error: profileError } = await admin.from("profiles").upsert({
+        id: data.user.id,
+        restaurant_id: unit,
+        name: body.name.trim().slice(0, 100),
+        role: body.role,
+        username: body.username,
+        active: true,
+      });
       if (profileError)
         return reply(
           { error: "Conta criada; perfil pendente. Contate o administrador." },

@@ -1,6 +1,6 @@
-# 🍽️ MesaConnect
+# benservire
 
-> **Estado do MVP:** há funcionalidades reais e telas demonstrativas. Leia [a auditoria técnica](AUDIT.md) antes de usar em um piloto. Métricas históricas ainda são exemplos; as políticas SQL versionadas precisam de revisão antes de uso com múltiplos restaurantes. A validação desta revisão está em [VALIDATION.md](VALIDATION.md).
+> **Estado atual:** autenticação por função, isolamento por estabelecimento, chamados e relatórios reais, Realtime, planta editável, avaliações públicas e API de dispositivos. A demonstração é isolada. Consulte [a identidade Benservire e os controles administrativos](docs/BENSERVIRE.md). O ESP32 ainda requer validação física no restaurante.
 
 **Demo interativa:** abra `/demo` para experimentar o salão, botão do cliente, atendimento e avaliação, com reprodução guiada ou interação manual. A demo é isolada e não grava no Supabase. Veja [detalhes e limites](docs/DEMO.md) e o [plano para o piloto](docs/PLANO-PRODUTO.md).
 
@@ -13,7 +13,8 @@
 
 Em restaurantes de rodízio e alta rotatividade, um dos maiores gargalos de satisfação é o momento em que o cliente deseja pedir mais comida, bebida ou fechar a conta, mas o garçom não percebe o gesto. O cliente espera, a experiência piora e o rodízio perde dinamismo.
 
-O **MesaConnect** resolve essa dor:
+O **Benservire** resolve essa dor:
+
 1. **Dispositivo Físico na Mesa (ESP32)**: O cliente aperta um botão físico discreto.
 2. **Recepção (Supabase Realtime)**: O objetivo é transmitir o evento pela rede e atualizar a equipe; a latência precisa ser medida no piloto.
 3. **Painel do Garçom (/calls)**: O garçom vê a mesa chamando com cronômetro em tempo real e assume o atendimento em 1 toque.
@@ -118,32 +119,41 @@ Mesa Connect/
 ## ⚡ Instalação e Execução Local
 
 ### 1. Clonar o repositório
+
 ```bash
 git clone https://github.com/vwnnicius/mesaconnect.git
 cd mesaconnect
 ```
 
 ### 2. Instalar dependências
+
 ```bash
 npm install
 ```
 
 ### 3. Configurar variáveis de ambiente
+
 Copie o arquivo `.env.example` para `.env.local`:
+
 ```bash
 cp .env.example .env.local
 ```
+
 Preencha as variáveis obtidas no seu painel do Supabase (**Project Settings > API**):
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anon-publica
 ```
+
 > **Demonstração local:** sem variáveis Supabase, o sistema usa dados em memória, perdidos ao recarregar. No modo configurado, falhas ao criar chamados ou enviar avaliações são apresentadas como erros, sem gravação local alternativa. Algumas leituras legadas ainda possuem fallback; veja `AUDIT.md`. O botão de demonstração no login aparece apenas sem configuração Supabase.
 
 ### 4. Rodar o servidor de desenvolvimento
+
 ```bash
 npm run dev
 ```
+
 Abra seu navegador em: `http://localhost:3000`
 
 ---
@@ -190,12 +200,15 @@ Antes de conectar placas físicas, você pode validar o fluxo de ponta a ponta:
 O endpoint experimental recebe eventos HTTP e compartilha o serviço de domínio com os cards do simulador. Antes de usar hardware no piloto, faltam autenticação individual de dispositivos, idempotência, limites e contexto Supabase server-side apropriado. O UID sozinho não autentica uma placa. Sem Supabase, o teste HTTP usa um store separado dos cards do browser e não sincroniza os dois ambientes.
 
 ### Endpoint:
+
 `POST /api/device/events`
 
 ### Header:
+
 `Content-Type: application/json`
 
 ### Exemplo de Payload:
+
 ```json
 {
   "device_uid": "MESA-007-ESP32",
@@ -205,6 +218,7 @@ O endpoint experimental recebe eventos HTTP e compartilha o serviço de domínio
 ```
 
 ### Eventos suportados:
+
 - `CALL`: Botão pressionado pelo cliente (gera chamado e alerta garçons).
 - `DO_NOT_DISTURB`: Cliente sinaliza não querer interrupção.
 - `RESET`: Mesa liberada.
@@ -224,4 +238,4 @@ O endpoint experimental recebe eventos HTTP e compartilha o serviço de domínio
 
 ## 📄 Licença
 
-Este projeto é desenvolvido para o ecossistema MesaConnect.
+Este projeto é desenvolvido para o ecossistema Benservire.

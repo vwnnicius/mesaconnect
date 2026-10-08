@@ -150,7 +150,7 @@ export function FloorPlan({
                 </span>
                 <b />
               </span>
-              {table.connected === false ? <small>Offline</small> : null}
+              <small>{table.connected === false ? "Offline" : TABLE_STATUS_CONFIG[table.status].label}</small>
             </button>
           );
         })}

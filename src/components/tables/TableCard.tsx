@@ -37,7 +37,9 @@ export function TableCard({ table }: TableCardProps) {
     >
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <span className="text-[11px] font-medium text-stone-500">Mesa</span>
+          <span className="text-[11px] font-medium text-muted-foreground">
+            Mesa
+          </span>
           <StatusDot status={table.status} size="sm" />
         </div>
         <div className="flex items-baseline justify-between">
@@ -45,14 +47,14 @@ export function TableCard({ table }: TableCardProps) {
             {table.number}
           </h3>
           {hasActiveCall ? (
-            <span className="font-mono text-xs tabular-nums text-stone-700 dark:text-stone-300">
+            <span className="font-mono text-xs tabular-nums text-foreground">
               {elapsed}
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-xs text-stone-500">
+      <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-xs text-muted-foreground">
         <span className="truncate pr-2">{config.description}</span>
         <Link
           href={`/evaluate/${restaurant.slug}/${table.number}`}

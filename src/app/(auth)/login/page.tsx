@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
@@ -78,57 +78,17 @@ export default function LoginPage() {
       <div className="login-theme">
         <ThemeToggle />
       </div>
-      <section className="login-story">
-        <Image
-          src="/images/restaurant-hospitality.png"
-          alt=""
-          fill
-          priority
-          sizes="(min-width:1024px) 50vw, 1px"
-          className="login-photo"
-        />
-        <Link href="/demo" className="brand-wordmark">
-          <BrandMark />
-          <span>
-            Mesa<span>Connect</span>
-          </span>
-        </Link>
-        <div className="login-story-copy">
-          <p className="eyebrow">Feito para quem recebe bem</p>
-          <h1>
-            Atendimento
-            <br />
-            no tempo certo.
-          </h1>
-          <p>
-            Um salão mais organizado.
-            <br />
-            Uma equipe mais presente.
-            <br />
-            Clientes que se sentem cuidados.
-          </p>
-          <div className="login-story-line" />
-        </div>
-        <div className="login-story-footer">
-          <span>
-            Mesas. Pessoas.
-            <br />
-            Boas experiências.
-          </span>
-          <span>MesaConnect</span>
-        </div>
-      </section>
-      <section className="login-panel">
+<section className="login-panel">
         <div className="login-form">
           <div className="brand-wordmark">
             <BrandMark />
             <span>
-              Mesa<span>Connect</span>
+              benservire
             </span>
           </div>
-          <h2>Bem-vindo de volta.</h2>
+          <h2>Bem-vindo.</h2>
           <p>
-            Entre na sua conta para acompanhar o atendimento do seu restaurante.
+            Entre para acessar seu restaurante.
           </p>
           <form onSubmit={login}>
             <label htmlFor="login-email">Login ou e-mail</label>
@@ -188,7 +148,7 @@ export default function LoginPage() {
             <ArrowRight size={17} />
           </Link>
           <p className="login-footnote">
-            Tecnologia discreta para restaurantes mais humanos.
+            Tecnologia para servir melhor.
           </p>
         </div>
       </section>

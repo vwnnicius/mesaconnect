@@ -66,7 +66,7 @@ export default function CustomerEvaluation() {
           ) : (
             <BrandMark />
           )}
-          <span>MesaConnect</span>
+          <span>benservire</span>
         </div>
         {table?.google_review_url && (
           <a
@@ -87,10 +87,10 @@ export default function CustomerEvaluation() {
         ) : sent ? (
           <div className="text-center py-8">
             <CheckCircle className="mx-auto text-accent mb-6" size={48} />
-            <h1>Obrigado pelo carinho.</h1>
+            <h1>Obrigado.</h1>
             <p className="customer-description">
               {isSupabaseConfigured()
-                ? "Sua avaliação foi enviada para a equipe."
+                ? "Sua opinião ajuda este restaurante a servir melhor."
                 : "Avaliação registrada nesta demonstração."}
             </p>
           </div>

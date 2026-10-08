@@ -99,7 +99,7 @@ export function GoogleReviews() {
           <a
             className="action-outline"
             href={qr}
-            download="mesaconnect-google.png"
+            download="benservire-google.png"
           >
             Baixar QR do Google
           </a>

@@ -43,7 +43,7 @@ export function DevicePairing() {
         <summary>Como conectar o equipamento</summary>
         <p className="mt-3">
           Configure Wi-Fi, identificador, token e o endereço HTTPS do
-          MesaConnect na placa. O botão envia CALL; o sinal de vida envia
+          benservire na placa. O botão envia CALL; o sinal de vida envia
           HEARTBEAT. Use o token no cabeçalho Authorization: Bearer. O
           equipamento não recebe credenciais administrativas do Supabase.
         </p>

@@ -32,7 +32,7 @@ export default function RootPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream dark:bg-background">
       <BrandMark className="w-11 h-11 mb-4" />
       <p className="text-sm font-medium text-stone-800 dark:text-stone-100">
-        MesaConnect
+        benservire
       </p>
       <p className="text-sm text-stone-500 mt-1">Abrindo o painel…</p>
     </div>

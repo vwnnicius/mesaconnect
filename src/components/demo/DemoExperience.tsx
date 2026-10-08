@@ -33,7 +33,7 @@ const chapters = [
 ];
 const chapterLabels = ["Mesa", "Chamar", "Assumir", "Concluir", "Avaliar"];
 const descriptions = [
-  "Cliente: escolha uma mesa e toque no botão. Verde significa disponível; nada foi solicitado ainda.",
+  "Cliente: escolha uma mesa e toque no botão. Disponível significa que nada foi solicitado; a luz do dispositivo fica apagada.",
   "O botão envia a solicitação pelo Wi-Fi. Âmbar significa chamando: o garçom vê a mesa, o tempo de espera e a prioridade na fila e na Tela.",
   "Garçom: toque em Atender agora para assumir a responsabilidade. Azul significa confirmado; vá até a mesa e registre observações úteis.",
   "Garçom: conclua somente depois de atender. Convide o cliente a avaliar pelo QR da mesa: sua opinião ajuda a melhorar o serviço. A avaliação é opcional.",
@@ -129,10 +129,10 @@ export function DemoExperience() {
         <Link
           href="/dashboard"
           className="flex items-center gap-3"
-          aria-label="MesaConnect, voltar ao painel"
+          aria-label="benservire, voltar ao painel"
         >
           <BrandMark className="w-8 h-8" />
-          <span className="font-semibold tracking-tight">MesaConnect</span>
+          <span className="font-semibold tracking-tight">benservire</span>
         </Link>
         <span className="demo-label">Experiência interativa</span>
         <ThemeToggle />
@@ -149,13 +149,11 @@ export function DemoExperience() {
       <main id="demo-content" className="demo-main">
         <section className="demo-intro">
           <div>
-            <p className="eyebrow">Do primeiro toque ao último detalhe</p>
-            <h1>
-              O salão, <span className="editorial-word">em sintonia.</span>
-            </h1>
+            <p className="eyebrow">Como funciona</p>
+            <h1>Do chamado ao atendimento.</h1>
             <p className="demo-description">
               Um cliente chama. A equipe percebe. O atendimento acontece.
-              <br className="hidden sm:block" /> Experimente o MesaConnect pelos
+              <br className="hidden sm:block" /> Experimente o benservire pelos
               dois lados da mesa.
             </p>
           </div>
@@ -251,7 +249,7 @@ export function DemoExperience() {
             <div className="demo-section-header">
               <div>
                 <p className="eyebrow">01 / O espaço</p>
-                <h2>Um olhar para o salão.</h2>
+                <h2>Mapa do salão.</h2>
               </div>
               <div className="demo-live-count">
                 <strong>{waiting}</strong> esperando <span>·</span>
@@ -288,7 +286,7 @@ export function DemoExperience() {
                 </span>
               </div>
               <div className="demo-device">
-                <span className="device-wordmark">mesaconnect</span>
+                <span className="device-wordmark">benservire one</span>
                 <button
                   type="button"
                   className="physical-button"
@@ -491,16 +489,15 @@ export function DemoExperience() {
           <div>
             <p className="eyebrow">O que aconteceu</p>
             <h2>
-              Pequenos gestos.
+              Histórico do atendimento.
               <br />
-              Tudo registrado.
             </h2>
             <p>Histórico local desta demonstração.</p>
           </div>
           <ol>
             {state.events.length === 0 ? (
               <li className="journal-empty">
-                O primeiro toque inicia a história.
+                Os eventos aparecerão aqui quando você chamar uma mesa.
               </li>
             ) : (
               state.events.slice(0, 5).map((event) => (
@@ -520,7 +517,7 @@ export function DemoExperience() {
           </ol>
         </section>
         <footer className="demo-footer">
-          <span>MesaConnect / Atendimento por mesa</span>
+          <span>benservire / Atendimento por mesa</span>
           <span>Protótipo funcional · hardware e conexão simulados</span>
         </footer>
       </main>

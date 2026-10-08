@@ -1,23 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-const manrope = localFont({
-  src: "../../public/fonts/Manrope.ttf",
-  variable: "--font-manrope",
-  display: "swap",
-  weight: "200 800",
-});
-const fraunces = localFont({
-  src: "../../public/fonts/Fraunces.ttf",
-  variable: "--font-fraunces",
+const geist = localFont({
+  src: "../../public/fonts/Geist.ttf",
+  variable: "--font-geist",
   display: "swap",
   weight: "100 900",
 });
 import "./globals.css";
-import "./hospitality.css";
-import "./design-refinements.css";
+import "./benservire.css";
 
 export const metadata: Metadata = {
-  title: "MesaConnect — Atendimento por mesa em tempo real",
+  title: "benservire — Tecnologia para servir melhor.",
   description:
     "Painel operacional para restaurantes e rodízios: chamados da mesa, mapa do salão e SLA da equipe.",
 };
@@ -25,7 +18,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f7f8fa",
+  themeColor: "#f7f6f2",
 };
 
 export default function RootLayout({
@@ -34,11 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pt-BR"
-      className={`${manrope.variable} ${fraunces.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="pt-BR" className={`${geist.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
